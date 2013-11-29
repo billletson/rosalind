@@ -189,7 +189,19 @@ def signed_permutations(n):
 		signed_perms.append([x*y for x,y in zip(s[0],s[1])])
 
 	return signed_perms
-	
+
+def n_connected_subgraphs(nodes,edges):
+	assignments = {}
+	for n in nodes:
+		assignments[n] = n
+	for edge in edges:
+		assign_to = assignments[edge[0]]
+		assign_from = assignments[edge[1]]
+		for a in assignments.items():
+			if a[1]==assign_from:
+				assignments[a[0]] = assign_to
+	return len(set(assignments.values()))
+			
 class Sequence:
 	codons = {}
 	amino_mass = {}
