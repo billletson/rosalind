@@ -1,7 +1,9 @@
 import re
 import urllib2
 import math
+import itertools
 from collections import defaultdict
+
 
 def load_FASTA_file(f,type="DNA"):
 	"""
@@ -71,8 +73,6 @@ def transition_transversion(first,second):
 				transversions += 1
 	return (transitions, transversions)
 		
-	
-	
 def consensus(dna_list):
 	"""
 	Compute consensus matrix and consensus string
@@ -156,6 +156,11 @@ def partial_permutation(n,k,mod=0):
 		if(mod!=0):
 			total = total % mod
 	return total
+
+def lexographic_permutations(letters,n):
+	perms = list(itertools.product(letters,repeat=n))
+	perms.sort(key=lambda x:[letters.index(y) for y in x])
+	return perms
 	
 class Sequence:
 	codons = {}
@@ -290,8 +295,7 @@ class DNA(Sequence):
 			else:
 				prob += math.log10(0.5-GC)
 		return prob
-					
-	
+						
 class RNA(Sequence):
 	def to_DNA(self):
 		"""
