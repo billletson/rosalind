@@ -1,6 +1,6 @@
 import rosalind
 
-f = open("test_inputs/LEXF.txt","rb")
+f = open("sample_inputs/LEXF.txt","rb")
 
 letters = f.next().strip().split()
 n = int(f.next().strip())

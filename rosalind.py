@@ -162,6 +162,24 @@ def lexographic_permutations(letters,n):
 	perms.sort(key=lambda x:[letters.index(y) for y in x])
 	return perms
 	
+def longest_monotonic_subsequence(series,decreasing=False):
+	subs = [[series[0]]]
+	if decreasing:
+		series = [-1*x for x in series]
+	for n in series:
+		for i in xrange(len(subs)-1,-1,-1):
+			if(n>subs[i][-1]):
+				if i==len(subs)-1:
+					subs.append(subs[i]+[n])
+				elif n<subs[i+1][-1]:
+					subs[i+1] = subs[i]+[n]
+			elif n<subs[i][-1] and (len(subs[i])<2 or n>subs[i][-2]):
+				subs[i][-1] = n
+	if decreasing:
+		return [-1*x for x in subs[-1]]
+	else:
+		return subs[-1]
+
 class Sequence:
 	codons = {}
 	amino_mass = {}
