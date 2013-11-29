@@ -180,6 +180,16 @@ def longest_monotonic_subsequence(series,decreasing=False):
 	else:
 		return subs[-1]
 
+def signed_permutations(n):
+	signed_perms = []
+	pos_perms = itertools.permutations(list(range(1,n+1)),n)
+	signs = itertools.product([1,-1], repeat=n)
+	signed_perms_uncombined = itertools.product(pos_perms,signs)
+	for s in signed_perms_uncombined:
+		signed_perms.append([x*y for x,y in zip(s[0],s[1])])
+
+	return signed_perms
+	
 class Sequence:
 	codons = {}
 	amino_mass = {}
