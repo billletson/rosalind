@@ -201,7 +201,35 @@ def n_connected_subgraphs(nodes,edges):
 			if a[1]==assign_from:
 				assignments[a[0]] = assign_to
 	return len(set(assignments.values()))
-			
+
+def absorb_sequence(master, absorbed):
+	l = len(absorbed)
+	for i in xrange(l,l/2,-1):
+		if master.sequence[:i]==absorbed.sequence[-i:]:
+			return DNA(absorbed.name+"/"+master.name,absorbed.sequence[:l-i]+master.sequence)
+		if master.sequence[-i:]==absorbed.sequence[:i]:
+			return DNA(master.name+"/"+absorbed.name,master.sequence+absorbed.sequence[-1*(l-i):])
+	return None
+		
+def superstring(dnas):
+	master = dnas[0]
+	dnas = dnas[1:]
+	merging = True
+	while merging:
+		survivors = []
+		merging = False
+		for dna in dnas:
+			new = absorb_sequence(master,dna)
+			if new is None:
+				survivors.append(dna)
+			else:
+				master = new
+				merging = True
+		dnas = survivors[:]
+	return master,dnas
+	
+	
+	
 class Sequence:
 	codons = {}
 	amino_mass = {}
