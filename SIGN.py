@@ -9,5 +9,4 @@ perms = rosalind.signed_permutations(n)
 
 g.write(str(len(perms))+"\n")
 for perm in perms:
-	g.write(" ".join(map(str,perm))+"\n")
-	
+    g.write(" ".join(map(str,perm))+"\n")

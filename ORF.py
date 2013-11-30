@@ -10,9 +10,9 @@ rna_frames = [x.to_RNA() for x in dna_frames]
 
 proteins = []
 for rna in rna_frames:
-	proteins += rna.to_protein()
-	
+    proteins += rna.to_protein()
+
 uniques = set([p.sequence for p in proteins])
 for u in uniques:
-	print u
+    print u
 
