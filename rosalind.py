@@ -5,7 +5,7 @@ import itertools
 from collections import defaultdict
 
 
-def load_FASTA_file(f, s_type="DNA"):
+def load_fasta_file(f, s_type="DNA"):
     """
     Reads a FASTA formatted file (or file-like object) and creates a list of
     sequence objects
@@ -39,7 +39,7 @@ def load_FASTA_file(f, s_type="DNA"):
     return sequences
 
 
-def load_FASTA_uniprot(uniprot_id, s_type="Protein"):
+def load_fasta_uniprot(uniprot_id, s_type="Protein"):
     """
     Given a uniprot id, creates a sequence object
     Arguments: string uniprot_id, str s_type
@@ -372,7 +372,7 @@ class Sequence:
 
 
 class DNA(Sequence):
-    def to_RNA(self):
+    def to_rna(self):
         """
         Convert DNA sequence to RNA sequence (T to U)
         Returns RNA object
@@ -421,9 +421,9 @@ class DNA(Sequence):
         palindromes = []
         for i in xrange(shortest, longest):
             for j in xrange(len(self)-i+1):
-                substring = self.substring(j,i)
+                substring = self.substring(j, i)
                 if substring == substring.reverse_complement():
-                    palindromes.append((substring, j+int(one_based), i))
+                    palindromes.append((substring, j + int(one_based), i))
         return palindromes
 
     def log_probability(self, gc=None):
@@ -441,12 +441,12 @@ class DNA(Sequence):
 
 
 class RNA(Sequence):
-    def to_DNA(self):
+    def to_dna(self):
         """
         Convert RNA sequence to DNA sequence (U to T)
         Returns DNA object
         """
-        return DNA(self.name, str.replace(self.sequence,"U","T"))
+        return DNA(self.name, str.replace(self.sequence, "U", "T"))
 
     def to_protein(self):
         """
@@ -491,7 +491,7 @@ class RNA(Sequence):
 
 
 class Protein(Sequence):
-    def infer_RNA(self, mod=0):
+    def infer_rna(self, mod=0):
         """
         For a given protein, find the number of possible
         RNA stands that could produce it, mod some number
