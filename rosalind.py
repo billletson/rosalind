@@ -45,10 +45,9 @@ def load_fasta_uniprot(uniprot_id, s_type="Protein"):
     Arguments: string uniprot_id, str s_type
     Returns: Sequence (DNA,RNA,or Protein)
     """
-    base_url = "http://www.uniprot.org/uniprot/%s.fasta"
-    response = urllib2.urlopen(base_url % uniprot_id)
+    response = urllib2.urlopen("http://www.uniprot.org/uniprot/%s.fasta" % uniprot_id)
     response.next()
-    sequence = "".join([line.strip() for line in response])
+    sequence = "".join(line.strip() for line in response)
     if s_type == "RNA":
         return RNA(uniprot_id, sequence)
     elif s_type == "DNA":
@@ -76,7 +75,6 @@ def transition_transversion(first, second):
     Arguments: DNA first, DNA second
     Returns: int,int
     """
-
     transitions = 0
     transversions = 0
     for x, y in zip(first.sequence, second.sequence):
@@ -101,9 +99,7 @@ def consensus(dnas):
         for dna in dnas:
             column[dna.sequence[i]] += 1
         matrix.append(column)
-    string = ""
-    for c in matrix:
-        string += max(c, key=c.get)
+    string = "".join(max(c, key=c.get) for c in matrix)
     return matrix, string
 
 
@@ -114,13 +110,10 @@ def overlap_graph(dnas, o):
     Arguments: Sequence[], int
     Returns: [(str,str)]
     """
-    pairs = []
-    for x in dnas:
-        for y in dnas:
-            if x.name != y.name or x.sequence != y.sequence:
-                if x.sequence[-o:] == y.sequence[:o]:
-                    pairs.append((x.name, y.name))
-    return pairs
+    return [(x.name,y.name) for x in dnas
+                            for y in dnas
+                                 if (x.name != y.name or x.sequence != y.sequence)
+                                     and x.sequence[-o:] == y.sequence[:o]]
 
 
 def longest_common_substring(dnas):
@@ -234,14 +227,10 @@ def signed_permutations(n):
     Arguments: int n
     Returns: int[][]
     """
-    signed_perms = []
-    pos_perms = itertools.permutations(list(range(1, n+1)), n)
+    pos_perms = itertools.permutations(xrange(1, n+1), n)
     signs = itertools.product([1, -1], repeat=n)
     signed_perms_uncombined = itertools.product(pos_perms, signs)
-    for s in signed_perms_uncombined:
-        signed_perms.append([x*y for x, y in zip(s[0], s[1])])
-
-    return signed_perms
+    return [[x*y for x, y in zip(s[0], s[1])] for s in signed_perms_uncombined]
 
 
 def n_connected_subgraphs(nodes, edges):
@@ -381,11 +370,8 @@ class DNA(Sequence):
         """
         Complements a stand and returns a string
         """
-        new_strand = ""
         pairs = {"A": "T", "T": "A", "G": "C", "C": "G"}
-        for x in self.sequence:
-            new_strand += pairs[x]
-        return new_strand
+        return "".join(pairs[x] for x in self.sequence)
 
     def complement(self):
         """
@@ -404,9 +390,9 @@ class DNA(Sequence):
         Return three sequences corresponding to the
         three possible reading frames
         """
-        dnas = [DNA(self.name, self.sequence[:]), DNA(self.name, self.sequence[1:-2]),
+        return [DNA(self.name, self.sequence[:]),
+                DNA(self.name, self.sequence[1:-2]),
                 DNA(self.name, self.sequence[2:-1])]
-        return dnas
 
     def reverse_palindromes(self, shortest, longest, one_based=False):
         """
@@ -522,11 +508,7 @@ class Protein(Sequence):
         Find all of the valid proteins that are a subsequence
         of this protein
         """
-        subproteins = []
-        for x in xrange(len(self)):
-            if self.sequence[x] == "M":
-                subproteins.append(Protein(self.name, self.sequence[x:]))
-        return subproteins
+        return [Protein(self.name, self.sequence[x:]) for x in xrange(len(self)) if self.sequence[x] == "M"]
 
 try:		
     Sequence.load_codons_file(open("reference_data/codons.txt"))
