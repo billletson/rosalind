@@ -48,9 +48,7 @@ def load_fasta_uniprot(uniprot_id, s_type="Protein"):
     base_url = "http://www.uniprot.org/uniprot/%s.fasta"
     response = urllib2.urlopen(base_url % uniprot_id)
     response.next()
-    sequence = ""
-    for line in response:
-        sequence += line.strip()
+    sequence = "".join([line.strip() for line in response])
     if s_type == "RNA":
         return RNA(uniprot_id, sequence)
     elif s_type == "DNA":
@@ -448,10 +446,10 @@ class RNA(Sequence):
         """
         return DNA(self.name, str.replace(self.sequence, "U", "T"))
 
-    def to_protein(self):
+    def to_proteins(self):
         """
         Convert RNA sequnce to a list of protein sequences
-        Returns lsit of protein objects
+        Returns list of protein objects
         """
         proteins = []
         start_flag = False
