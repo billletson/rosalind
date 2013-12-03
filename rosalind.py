@@ -295,6 +295,14 @@ def superstring(dnas):
     return master, dnas
 
 
+def unrooted_internal_from_leaves(leaves):
+    return leaves - 2
+
+
+def unrooted_leaves_from_internal(internal):
+    return internal + 2
+
+
 class Sequence:
     codons = {}
     amino_mass = {}

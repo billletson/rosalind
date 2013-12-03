@@ -394,3 +394,13 @@ def prob_tree(mode="sample"):
         edges = [map(int, x.strip().split()) for x in f]
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.n_connected_subgraphs(list(range(1, n + 1)), edges) - 1))
+
+
+def prob_inod(mode="sample"):
+    """
+    Counting Phylogenetic Ancestors
+    """
+    with open(mode + "_inputs/INOD.txt", "rb") as f:
+        leaves = int(f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(str(rosalind.unrooted_internal_from_leaves(leaves)))

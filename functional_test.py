@@ -65,5 +65,10 @@ problems.prob_tran()
 assert filecmp.cmp("answer.txt", "sample_answers/TRAN.txt")
 problems.prob_tree()
 assert filecmp.cmp("answer.txt", "sample_answers/TREE.txt")
+problems.prob_inod()
+assert filecmp.cmp("answer.txt", "sample_answers/INOD.txt")
+
+
+
 
 print "tests pass"
