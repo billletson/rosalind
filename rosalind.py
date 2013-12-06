@@ -303,6 +303,20 @@ def unrooted_leaves_from_internal(internal):
     return internal + 2
 
 
+def combinations(n, r):
+    import operator as op
+    if r == 1:
+        return n
+    elif n == r or r == 0:
+        return 1
+    else:
+        return reduce(op.mul, xrange(n, n-r, -1))/reduce(op.mul, xrange(1, r+1))
+
+
+def subset_count(n):
+    return sum(combinations(n, r) for r in xrange(0, n+1))
+
+
 class Sequence:
     codons = {}
     amino_mass = {}
@@ -480,6 +494,16 @@ class RNA(Sequence):
             return 0
         else:
             return math.factorial(cnt_a)*math.factorial(cnt_g)
+
+    def maximum_matchings(self):
+        import operator as op
+        cnt_a = self.count("A")
+        cnt_u = self.count("U")
+        cnt_g = self.count("G")
+        cnt_c = self.count("C")
+        return reduce(op.mul, xrange(max(cnt_a,cnt_u), abs(cnt_a-cnt_u), -1)) * \
+               reduce(op.mul, xrange(max(cnt_g,cnt_c), abs(cnt_g-cnt_c), -1))
+
 
 
 class Protein(Sequence):

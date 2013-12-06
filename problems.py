@@ -404,3 +404,23 @@ def prob_inod(mode="sample"):
         leaves = int(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.unrooted_internal_from_leaves(leaves)))
+
+
+def prob_mmch(mode="sample"):
+    """
+    Maximum Matchings and RNA Secondary Structures
+    """
+    with open(mode + "_inputs/MMCH.txt", "rb") as f:
+        rna = rosalind.load_fasta_file(f, "RNA")[0]
+    with open("answer.txt", "wb") as g:
+        g.write(str(rna.maximum_matchings()))
+
+
+def prob_sset(mode="sample"):
+    """
+    Counting Phylogenetic Ancestors
+    """
+    with open(mode + "_inputs/SSET.txt", "rb") as f:
+        n = int(f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(str(rosalind.subset_count(n)%1000000))

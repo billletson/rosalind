@@ -67,6 +67,10 @@ problems.prob_tree()
 assert filecmp.cmp("answer.txt", "sample_answers/TREE.txt")
 problems.prob_inod()
 assert filecmp.cmp("answer.txt", "sample_answers/INOD.txt")
+problems.prob_mmch()
+assert filecmp.cmp("answer.txt", "sample_answers/MMCH.txt")
+problems.prob_sset()
+assert filecmp.cmp("answer.txt", "sample_answers/SSET.txt")
 
 
 
