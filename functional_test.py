@@ -71,7 +71,8 @@ problems.prob_mmch()
 assert filecmp.cmp("answer.txt", "sample_answers/MMCH.txt")
 problems.prob_sset()
 assert filecmp.cmp("answer.txt", "sample_answers/SSET.txt")
-
+problems.prob_cat()
+assert filecmp.cmp("answer.txt", "sample_answers/CAT.txt")
 
 
 

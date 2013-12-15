@@ -447,6 +447,8 @@ class DNA(Sequence):
 
 
 class RNA(Sequence):
+    pairs = {"A": "U", "U": "A", "G": "C", "C": "G"}
+
     def to_dna(self):
         """
         Convert RNA sequence to DNA sequence (U to T)
@@ -503,6 +505,34 @@ class RNA(Sequence):
         cnt_c = self.count("C")
         return reduce(op.mul, xrange(max(cnt_a,cnt_u), abs(cnt_a-cnt_u), -1)) * \
                reduce(op.mul, xrange(max(cnt_g,cnt_c), abs(cnt_g-cnt_c), -1))
+
+    def perfect_noncrossing_matchings(self):
+        class Crossings(dict):
+            def set_sequence(self, sequence):
+                self.sequence = sequence
+
+            def __missing__(self, key):
+                start = key[0]
+                end = key[1]
+                self[key] = 0
+                if start > end:
+                    self[key] = 1
+                    return 1
+                if (end - start) % 2 == 0:
+                    return 0
+                for x in xrange(start + 1, end+1):
+                    if self.sequence[start] == "A" and self.sequence[x] == "U" or \
+                       self.sequence[start] == "U" and self.sequence[x] == "A" or \
+                       self.sequence[start] == "C" and self.sequence[x] == "G" or \
+                       self.sequence[start] == "G" and self.sequence[x] == "C":
+                        self[key] += (self[(start + 1, x - 1)] * self[(x + 1, end)])
+                self[key]
+                return self[key]
+
+        cross = Crossings()
+        cross.set_sequence(self.sequence)
+        cross[(0, len(self.sequence) - 1)]
+        return cross[(0, len(self.sequence) - 1)]
 
 
 

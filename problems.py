@@ -424,3 +424,13 @@ def prob_sset(mode="sample"):
         n = int(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.subset_count(n)%1000000))
+
+
+def prob_cat(mode="sample"):
+    """
+    Catalan Numbers and RNA Secondary Structures
+    """
+    with open(mode + "_inputs/CAT.txt", "rb") as f:
+        rna = rosalind.load_fasta_file(f, "RNA")[0]
+    with open("answer.txt", "wb") as g:
+        g.write(str(rna.perfect_noncrossing_matchings()%1000000))
