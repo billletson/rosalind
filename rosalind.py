@@ -110,7 +110,7 @@ def overlap_graph(dnas, o):
     Arguments: Sequence[], int
     Returns: [(str,str)]
     """
-    return [(x.name,y.name) for x in dnas
+    return [(x.name, y.name) for x in dnas
                             for y in dnas
                                  if (x.name != y.name or x.sequence != y.sequence)
                                      and x.sequence[-o:] == y.sequence[:o]]
@@ -379,6 +379,17 @@ class Sequence:
     def substring(self, start, length):
         return self.__class__(self.name, self.sequence[start:start+length])
 
+    def failure_array(self):
+        failure = [0]
+        for i in xrange(1, len(self)):
+            if self.sequence[i - failure[-1]:i + 1] == self.sequence[0:failure[-1] + 1]:
+                failure.append(failure[-1] + 1)
+            elif self.sequence[i - failure[failure[-1] - 1]:i + 1] == self.sequence[0:failure[failure[-1] - 1] + 1]:
+                failure.append(failure[failure[-1] - 1] + 1)
+            else:
+                failure.append(0)
+        return failure
+
 
 class DNA(Sequence):
     def to_rna(self):
@@ -503,8 +514,8 @@ class RNA(Sequence):
         cnt_u = self.count("U")
         cnt_g = self.count("G")
         cnt_c = self.count("C")
-        return reduce(op.mul, xrange(max(cnt_a,cnt_u), abs(cnt_a-cnt_u), -1)) * \
-               reduce(op.mul, xrange(max(cnt_g,cnt_c), abs(cnt_g-cnt_c), -1))
+        return reduce(op.mul, xrange(max(cnt_a, cnt_u), abs(cnt_a-cnt_u), -1)) * \
+               reduce(op.mul, xrange(max(cnt_g, cnt_c), abs(cnt_g-cnt_c), -1))
 
     def perfect_noncrossing_matchings(self):
         class Crossings(dict):

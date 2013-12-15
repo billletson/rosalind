@@ -434,3 +434,13 @@ def prob_cat(mode="sample"):
         rna = rosalind.load_fasta_file(f, "RNA")[0]
     with open("answer.txt", "wb") as g:
         g.write(str(rna.perfect_noncrossing_matchings()%1000000))
+
+
+def prob_kmp(mode="sample"):
+    """
+    Speeding Up Motif Finding
+    """
+    with open(mode + "_inputs/KMP.txt", "rb") as f:
+        dna = rosalind.load_fasta_file(f)[0]
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join(map(str, dna.failure_array())))
