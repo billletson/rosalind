@@ -103,6 +103,10 @@ def consensus(dnas):
     return matrix, string
 
 
+def difference_matrix(dnas):
+    return [[hamming(x, y) / float(len(x)) for y in dnas] for x in dnas]
+
+
 def overlap_graph(dnas, o):
     """
     Compute overlap graph given a list of Sequence objects and a

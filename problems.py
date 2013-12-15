@@ -444,3 +444,13 @@ def prob_kmp(mode="sample"):
         dna = rosalind.load_fasta_file(f)[0]
     with open("answer.txt", "wb") as g:
         g.write(" ".join(map(str, dna.failure_array())))
+
+
+def prob_pdst(mode="sample"):
+    """
+    Creating a Distance Matrix
+    """
+    with open(mode + "_inputs/PDST.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join([" ".join(map("{:.5f}".format, x)) for x in rosalind.difference_matrix(dnas)]))
