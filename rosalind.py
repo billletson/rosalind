@@ -460,6 +460,9 @@ class DNA(Sequence):
                 prob += math.log10(0.5-gc)
         return prob
 
+    def probability_with_repeated_attempts(self, attempts, gc=None):
+        return 1 - (1.0-10.0**self.log_probability(gc))**attempts
+
 
 class RNA(Sequence):
     pairs = {"A": "U", "U": "A", "G": "C", "C": "G"}

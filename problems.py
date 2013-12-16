@@ -454,3 +454,14 @@ def prob_pdst(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join([" ".join(map("{:.5f}".format, x)) for x in rosalind.difference_matrix(dnas)]))
+
+
+def prob_rstr(mode="sample"):
+    """
+    Matching Random Motifs
+    """
+    with open(mode + "_inputs/RSTR.txt", "rb") as f:
+        attempts, gc = map(float, f.next().strip().split())
+        dna = rosalind.DNA("", f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write("%.3f" % dna.probability_with_repeated_attempts(attempts, gc))

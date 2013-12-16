@@ -77,6 +77,7 @@ problems.prob_kmp()
 assert filecmp.cmp("answer.txt", "sample_answers/KMP.txt")
 problems.prob_pdst()
 assert filecmp.cmp("answer.txt", "sample_answers/PDST.txt")
-
+problems.prob_rstr()
+assert filecmp.cmp("answer.txt", "sample_answers/RSTR.txt")
 
 print "tests pass"
