@@ -292,7 +292,7 @@ def prob_lexf(mode="sample"):
         letters = f.next().strip().split()
         n = int(f.next().strip())
     with open("answer.txt", "wb") as g:
-        g.write("\r\n".join(["".join(x) for x in rosalind.lexicographic_permutations(letters, n)]))
+        g.write("\r\n".join(rosalind.lexicographic_permutations(letters, n)))
 
 
 def prob_lgis(mode="sample"):
@@ -485,3 +485,14 @@ def prob_kmer(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write(" ".join([str(x) for x in dnas[0].k_mer_composition(4)]))
+
+
+def prob_lexv(mode="sample"):
+    """
+    Ordering Strings of Varying Length Lexicographically
+    """
+    with open(mode + "_inputs/LEXV.txt", "rb") as f:
+        alphabet = f.next().strip().split()
+        length = int(f.next().strip().split()[0])
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(rosalind.multilength_lexicographic_permutations(alphabet, length)))

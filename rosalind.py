@@ -199,7 +199,14 @@ def lexicographic_permutations(letters, n):
     """
     perms = list(itertools.product(letters, repeat=n))
     perms.sort(key=lambda x: [letters.index(y) for y in x])
-    return perms
+    return ["".join(x) for x in perms]
+
+
+def multilength_lexicographic_permutations(letters, n):
+    perms = []
+    for i in xrange(1, n + 1):
+        perms += lexicographic_permutations(letters, i)
+    return sorted(perms, key=lambda word: [letters.index(c) for c in word])
 
 
 def longest_monotonic_subsequence(series, decreasing=False):
@@ -488,8 +495,6 @@ class DNA(Sequence):
         for i in xrange(len(self) - k + 1):
             counts[self.sequence[i:i + k]] += 1
         return [counts["".join(x)] for x in itertools.product('ACGT', repeat=k)]
-
-
 
 
 class RNA(Sequence):
