@@ -62,8 +62,12 @@ def hamming(first, second):
     Arguments: Sequence first, Sequence second
     Returns: int
     """
+    return _string_hamming(first.sequence, second.sequence)
+
+
+def _string_hamming(first, second):
     count = 0
-    for x in zip(first.sequence, second.sequence):
+    for x in zip(first, second):
         if x[0] != x[1]:
             count += 1
     return count
@@ -321,6 +325,25 @@ def subset_count(n):
     return sum(combinations(n, r) for r in xrange(0, n+1))
 
 
+def identify_read_errors(dnas):
+    corrections = []
+    from collections import defaultdict
+    counts = defaultdict(int)
+    for dna in dnas:
+        counts[dna.sequence] += 1
+        counts[dna.reverse_complement().sequence] += 1
+    for dna in dnas:
+        if counts[dna.sequence] < 2:
+            for correct in counts.keys():
+                if counts[correct] > 1:
+                    if _string_hamming(dna.sequence, correct) == 1:
+                        corrections.append((dna, DNA(dna.name, correct)))
+                        break
+    for c in corrections:
+        print c[0].sequence, counts[c[0].sequence]
+    return corrections
+
+
 class Sequence:
     codons = {}
     amino_mass = {}
@@ -551,7 +574,6 @@ class RNA(Sequence):
         cross.set_sequence(self.sequence)
         cross[(0, len(self.sequence) - 1)]
         return cross[(0, len(self.sequence) - 1)]
-
 
 
 class Protein(Sequence):

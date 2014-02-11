@@ -465,3 +465,13 @@ def prob_rstr(mode="sample"):
         dna = rosalind.DNA("", f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write("%.3f" % dna.probability_with_repeated_attempts(attempts, gc))
+
+
+def prob_corr(mode="sample"):
+    """
+    Error Correction in Reads
+    """
+    with open(mode + "_inputs/CORR.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(["%s->%s" % (x[0].sequence, x[1].sequence) for x in rosalind.identify_read_errors(dnas)]))
