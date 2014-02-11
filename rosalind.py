@@ -327,7 +327,6 @@ def subset_count(n):
 
 def identify_read_errors(dnas):
     corrections = []
-    from collections import defaultdict
     counts = defaultdict(int)
     for dna in dnas:
         counts[dna.sequence] += 1
@@ -339,8 +338,6 @@ def identify_read_errors(dnas):
                     if _string_hamming(dna.sequence, correct) == 1:
                         corrections.append((dna, DNA(dna.name, correct)))
                         break
-    for c in corrections:
-        print c[0].sequence, counts[c[0].sequence]
     return corrections
 
 
@@ -485,6 +482,14 @@ class DNA(Sequence):
 
     def probability_with_repeated_attempts(self, attempts, gc=None):
         return 1 - (1.0-10.0**self.log_probability(gc))**attempts
+
+    def k_mer_composition(self, k):
+        counts = defaultdict(int)
+        for i in xrange(len(self) - k + 1):
+            counts[self.sequence[i:i + k]] += 1
+        return [counts["".join(x)] for x in itertools.product('ACGT', repeat=k)]
+
+
 
 
 class RNA(Sequence):

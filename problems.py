@@ -475,3 +475,13 @@ def prob_corr(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(["%s->%s" % (x[0].sequence, x[1].sequence) for x in rosalind.identify_read_errors(dnas)]))
+
+
+def prob_kmer(mode="sample"):
+    """
+    k-Mer Composition
+    """
+    with open(mode + "_inputs/KMER.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join([str(x) for x in dnas[0].k_mer_composition(4)]))
