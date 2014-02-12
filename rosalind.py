@@ -348,6 +348,24 @@ def identify_read_errors(dnas):
     return corrections
 
 
+def reversal_distance(original, target):
+    reversals = 0
+    for i in xrange(len(original)):
+        print original
+        #print target
+        if original == target:
+            return reversals
+        if original[i] != target[i]:
+            tmp = original.index(target[i])
+            #print tmp, i
+            #print original[0:i]
+            #print list(reversed(original[i:tmp + 1]))
+            #print original[tmp:]
+            original = original[0:i] + list(reversed(original[i:tmp + 1])) + original[tmp + 1:]
+            reversals += 1
+    return reversals
+
+
 class Sequence:
     codons = {}
     amino_mass = {}

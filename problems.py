@@ -496,3 +496,21 @@ def prob_lexv(mode="sample"):
         length = int(f.next().strip().split()[0])
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(rosalind.multilength_lexicographic_permutations(alphabet, length)))
+
+
+def prob_rear(mode="sample"):
+    """
+    Reversal Distance
+    """
+    with open(mode + "_inputs/REAR.txt", "rb") as f:
+        pairs = []
+        tmp = []
+        for line in f:
+            if line.strip() == "":
+                pairs.append(tmp)
+                tmp = []
+            else:
+                tmp.append(line.strip().split())
+        pairs.append(tmp)
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join([str(rosalind.reversal_distance(x[0], x[1])) for x in pairs]))
