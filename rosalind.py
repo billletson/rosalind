@@ -349,21 +349,54 @@ def identify_read_errors(dnas):
 
 
 def reversal_distance(original, target):
-    reversals = 0
-    for i in xrange(len(original)):
-        print original
-        #print target
-        if original == target:
-            return reversals
-        if original[i] != target[i]:
-            tmp = original.index(target[i])
-            #print tmp, i
-            #print original[0:i]
-            #print list(reversed(original[i:tmp + 1]))
-            #print original[tmp:]
-            original = original[0:i] + list(reversed(original[i:tmp + 1])) + original[tmp + 1:]
-            reversals += 1
-    return reversals
+    """
+    See paper at http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.91.3123&rep=rep1&type=pdf
+    """
+    if original == target:
+        return 0
+    order = [target.index(x) for x in original]
+    return _recurse_reversal_distance(order)
+
+
+def _recurse_reversal_distance(order):
+    breakpoints, negative_strip = _find_breakpoints(order)
+    if not breakpoints:
+        return 0
+    reversals = []
+    for bp in breakpoints:
+        if bp == -1:
+            swaps = [order.index(0)]
+        elif order[bp] == len(order) - 1:
+            swaps = [order.index(order[bp] - 1)]
+        elif order[bp] == 0:
+            swaps = [order.index(order[bp] + 1)]
+        else:
+            swaps = [order.index(order[bp] - 1), order.index(order[bp] + 1)]
+        for swap in swaps:
+            candidate_order = order[:bp+1] + list(reversed(order[bp+1:swap+1])) + order[swap+1:]
+            candidate_breakpoints, negative_strip = _find_breakpoints(candidate_order)
+            reduction = len(breakpoints) - len(candidate_breakpoints)
+            if len(candidate_breakpoints) == 0:
+                return 1
+            if reduction > 1 or (reduction == 1 and negative_strip):
+                reversals.append(_recurse_reversal_distance(candidate_order) + 1)
+    if reversals:
+        return min(reversals)
+    else:
+        return len(order) + 1
+
+
+def _find_breakpoints(order):
+    breakpoints = []
+    negative_strip = False
+    if order[0] != 0:
+        breakpoints.append(-1)
+    for i in xrange(len(order) - 1):
+        if abs(order[i] - order[i + 1]) != 1:
+            breakpoints.append(i)
+        elif order[i] - order[i + 1] == 1:
+            negative_strip = True
+    return breakpoints, negative_strip
 
 
 class Sequence:
