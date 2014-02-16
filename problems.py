@@ -514,3 +514,13 @@ def prob_rear(mode="sample"):
         pairs.append(tmp)
     with open("answer.txt", "wb") as g:
         g.write(" ".join([str(rosalind.reversal_distance(x[0], x[1])) for x in pairs]))
+
+
+def prob_lcsq(mode="sample"):
+    """
+    Finding a Shared Spliced Motif
+    """
+    with open(mode + "_inputs/LCSQ.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write(rosalind.longest_common_subsequence(dnas[0], dnas[1]).sequence)

@@ -87,5 +87,7 @@ problems.prob_lexv()
 assert filecmp.cmp("answer.txt", "sample_answers/LEXV.txt")
 problems.prob_rear()
 assert filecmp.cmp("answer.txt", "sample_answers/REAR.txt")
+problems.prob_lcsq()
+assert filecmp.cmp("answer.txt", "sample_answers/LCSQ.txt")
 
 print "tests pass"
