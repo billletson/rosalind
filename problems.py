@@ -513,7 +513,7 @@ def prob_rear(mode="sample"):
                 tmp.append(line.strip().split())
         pairs.append(tmp)
     with open("answer.txt", "wb") as g:
-        g.write(" ".join([str(rosalind.reversal_distance(x[0], x[1])) for x in pairs]))
+        g.write(" ".join([str(len(rosalind.find_reversals(x[0], x[1]))) for x in pairs]))
 
 
 def prob_lcsq(mode="sample"):
@@ -524,3 +524,16 @@ def prob_lcsq(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write(rosalind.longest_common_subsequence(dnas[0], dnas[1]).sequence)
+
+
+def prob_sort(mode="sample"):
+    """
+    Sorting by Reversals
+    """
+    with open(mode + "_inputs/SORT.txt", "rb") as f:
+        original = map(int, f.next().strip().split())
+        target = map(int, f.next().strip().split())
+    with open("answer.txt", "wb") as g:
+        answer = rosalind.find_reversals(original, target)
+        answer = [(x[0] + 1, x[1] + 1) for x in answer]
+        g.write("\r\n".join([str(len(answer))] + [" ".join(map(str, x)) for x in answer]))

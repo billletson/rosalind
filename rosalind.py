@@ -349,20 +349,20 @@ def identify_read_errors(dnas):
     return corrections
 
 
-def reversal_distance(original, target):
+def find_reversals(original, target):
     """
     See paper at http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.91.3123&rep=rep1&type=pdf
     """
     if original == target:
-        return 0
+        return []
     order = [target.index(x) for x in original]
-    return _recurse_reversal_distance(order)
+    return list(reversed(_recurse_find_reversals(order)))
 
 
-def _recurse_reversal_distance(order):
+def _recurse_find_reversals(order):
     breakpoints, negative_strip = _find_breakpoints(order)
     if not breakpoints:
-        return 0
+        return []
     reversals = []
     for bp in breakpoints:
         if bp == -1:
@@ -378,13 +378,13 @@ def _recurse_reversal_distance(order):
             candidate_breakpoints, negative_strip = _find_breakpoints(candidate_order)
             reduction = len(breakpoints) - len(candidate_breakpoints)
             if len(candidate_breakpoints) == 0:
-                return 1
+                return [(bp + 1, swap)]
             if reduction > 1 or (reduction == 1 and negative_strip):
-                reversals.append(_recurse_reversal_distance(candidate_order) + 1)
+                reversals.append(_recurse_find_reversals(candidate_order) + [(bp + 1, swap)])
     if reversals:
-        return min(reversals)
+        return min(reversals, key=len)
     else:
-        return len(order) + 1
+        return [0] * (len(order) + 1)
 
 
 def _find_breakpoints(order):
