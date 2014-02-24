@@ -84,3 +84,13 @@ def multilength_lexicographic_permutations(letters, n):
     for i in xrange(1, n + 1):
         perms += lexicographic_permutations(letters, i)
     return sorted(perms, key=lambda word: [letters.index(c) for c in word])
+
+
+def expected_restriction_sites(str_len, substring, gc_content):
+    same_length_prob = 1
+    for l in substring:
+        if l in ["G", "C"]:
+            same_length_prob *= gc_content / 2
+        else:
+            same_length_prob *= (1 - gc_content) / 2
+    return same_length_prob * (str_len - len(substring) + 1)

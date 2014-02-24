@@ -546,3 +546,15 @@ def prob_edit(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.levenshtein(dnas[0], dnas[1])))
+
+
+def prob_eval(mode="sample"):
+    """
+    Expected Number of Restriction Sites
+    """
+    with open(mode + "_inputs/EVAL.txt", "rb") as f:
+        str_len = int(f.next().strip())
+        substring = f.next().strip()
+        gc_contents = map(float, f.next().strip().split())
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join(["%0.3f" % rosalind.expected_restriction_sites(str_len, substring, gc) for gc in gc_contents]))
