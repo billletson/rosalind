@@ -93,5 +93,7 @@ problems.prob_sort()
 assert filecmp.cmp("answer.txt", "sample_answers/SORT.txt")
 problems.prob_edit()
 assert filecmp.cmp("answer.txt", "sample_answers/EDIT.txt")
+problems.prob_aspc()
+assert filecmp.cmp("answer.txt", "sample_answers/ASPC.txt")
 
 print "tests pass"

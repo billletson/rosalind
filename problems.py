@@ -417,7 +417,7 @@ def prob_mmch(mode="sample"):
 
 def prob_sset(mode="sample"):
     """
-    Counting Phylogenetic Ancestors
+    Counting Subsets
     """
     with open(mode + "_inputs/SSET.txt", "rb") as f:
         n = int(f.next().strip())
@@ -558,3 +558,13 @@ def prob_eval(mode="sample"):
         gc_contents = map(float, f.next().strip().split())
     with open("answer.txt", "wb") as g:
         g.write(" ".join(["%0.3f" % rosalind.expected_restriction_sites(str_len, substring, gc) for gc in gc_contents]))
+
+
+def prob_aspc(mode="sample"):
+    """
+    Introduction to Alternative Splicing
+    """
+    with open(mode + "_inputs/ASPC.txt", "rb") as f:
+        n, m = map(int, f.next().strip().split())
+    with open("answer.txt", "wb") as g:
+        g.write(str(rosalind.subset_count(n, m) % 1000000))

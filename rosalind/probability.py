@@ -64,8 +64,10 @@ def combinations(n, r):
         return reduce(op.mul, xrange(n, n-r, -1))/reduce(op.mul, xrange(1, r+1))
 
 
-def subset_count(n):
-    return sum(combinations(n, r) for r in xrange(0, n+1))
+def subset_count(n, min_r=0, max_r=None):
+    if max_r is None:
+        max_r = n + 1
+    return sum(combinations(n, r) for r in xrange(min_r, max_r))
 
 
 def lexicographic_permutations(letters, n):
