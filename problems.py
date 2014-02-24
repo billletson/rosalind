@@ -536,3 +536,13 @@ def prob_sort(mode="sample"):
         answer = rosalind.find_reversals(original, target)
         answer = [(x[0] + 1, x[1] + 1) for x in answer]
         g.write("\r\n".join([str(len(answer))] + [" ".join(map(str, x)) for x in answer]))
+
+
+def prob_edit(mode="sample"):
+    """
+    Edit Distance
+    """
+    with open(mode + "_inputs/EDIT.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write(str(rosalind.levenshtein(dnas[0], dnas[1])))

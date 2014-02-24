@@ -91,5 +91,7 @@ problems.prob_lcsq()
 assert filecmp.cmp("answer.txt", "sample_answers/LCSQ.txt")
 problems.prob_sort()
 assert filecmp.cmp("answer.txt", "sample_answers/SORT.txt")
+problems.prob_edit()
+assert filecmp.cmp("answer.txt", "sample_answers/EDIT.txt")
 
 print "tests pass"

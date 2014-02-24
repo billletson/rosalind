@@ -20,6 +20,25 @@ def _string_hamming(first, second):
     return count
 
 
+def levenshtein(first, second):
+    s = first.sequence
+    t = second.sequence
+    m = len(s)
+    n = len(t)
+    matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    for i in xrange(m+1):
+        matrix[i][0] = i
+    for i in xrange(n+1):
+        matrix[0][i] = i
+    for j in xrange(1, n + 1):
+        for i in xrange(1, m + 1):
+            if s[i - 1] == t[j - 1]:
+                matrix[i][j] = matrix[i - 1][j - 1]
+            else:
+                matrix[i][j] = min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + 1)
+    return matrix[m][n]
+
+
 def transition_transversion(first, second):
     """
     Computes the transition and transversion counts for two DNA sequences
