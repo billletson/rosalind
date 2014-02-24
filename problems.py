@@ -568,3 +568,25 @@ def prob_aspc(mode="sample"):
         n, m = map(int, f.next().strip().split())
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.subset_count(n, m) % 1000000))
+
+
+def prob_seto(mode="sample"):
+    """
+    Introduction to Set Operations
+    """
+    with open(mode + "_inputs/SETO.txt", "rb") as f:
+        base = set(map(str, xrange(1, int(f.next().strip()) + 1)))
+        a = set(f.next().strip().strip("{").strip("}").split(", "))
+        b = set(f.next().strip().strip("{").strip("}").split(", "))
+    with open("answer.txt", "wb") as g:
+        g.write("{" + ", ".join(a.union(b)) + "}")
+        g.write("\r\n")
+        g.write("{" + ", ".join(a.intersection(b)) + "}")
+        g.write("\r\n")
+        g.write("{" + ", ".join(a.difference(b)) + "}")
+        g.write("\r\n")
+        g.write("{" + ", ".join(b.difference(a)) + "}")
+        g.write("\r\n")
+        g.write("{" + ", ".join(base.difference(a)) + "}")
+        g.write("\r\n")
+        g.write("{" + ", ".join(base.difference(b)) + "}")

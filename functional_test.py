@@ -95,5 +95,7 @@ problems.prob_edit()
 assert filecmp.cmp("answer.txt", "sample_answers/EDIT.txt")
 problems.prob_aspc()
 assert filecmp.cmp("answer.txt", "sample_answers/ASPC.txt")
+problems.prob_seto()
+assert filecmp.cmp("answer.txt", "sample_answers/SETO.txt")
 
 print "tests pass"
