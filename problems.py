@@ -25,7 +25,6 @@ def prob_rna(mode="sample"):
         g.write(rna.sequence)
 
 
-
 def prob_revc(mode="sample"):
     """
     Complementing a Strand of DNA
@@ -113,7 +112,7 @@ def prob_cons(mode="sample"):
     Consensus and Profile
     """
     with open(mode + "_inputs/CONS.txt", "rb") as f:
-        dnas = rosalind.load_fasta_file(open(mode + "_inputs/CONS.txt", "rb"))
+        dnas = rosalind.load_fasta_file(f)
     matrix, string = rosalind.consensus(dnas)
     with open("answer.txt", "wb") as g:
         g.write(string)
@@ -133,7 +132,7 @@ def prob_fibd(mode="sample"):
     """
     from collections import defaultdict
     with open(mode + "_inputs/FIBD.txt", "rb") as f:
-        n, m = map(int,f.readline().strip().split())
+        n, m = map(int, f.readline().strip().split())
     rabbits = defaultdict(lambda: [0, 0, 0])
     rabbits[0] = [1, 0, 0]
     rabbits[m - 1] = [0, 0, 1]
@@ -256,7 +255,7 @@ def prob_prtm(mode="sample"):
     with open(mode + "_inputs/PRTM.txt", "rb") as f:
         protein = rosalind.Protein("", f.next().strip())
     with open("answer.txt", "wb") as g:
-        g.write("%.3f" % protein.mass())
+        g.write("%.3f" % protein.mass)
 
 
 def prob_revp(mode="sample"):
@@ -423,7 +422,7 @@ def prob_sset(mode="sample"):
     with open(mode + "_inputs/SSET.txt", "rb") as f:
         n = int(f.next().strip())
     with open("answer.txt", "wb") as g:
-        g.write(str(rosalind.subset_count(n)%1000000))
+        g.write(str(rosalind.subset_count(n) % 1000000))
 
 
 def prob_cat(mode="sample"):
@@ -433,7 +432,7 @@ def prob_cat(mode="sample"):
     with open(mode + "_inputs/CAT.txt", "rb") as f:
         rna = rosalind.load_fasta_file(f, "RNA")[0]
     with open("answer.txt", "wb") as g:
-        g.write(str(rna.perfect_noncrossing_matchings()%1000000))
+        g.write(str(rna.perfect_noncrossing_matchings() % 1000000))
 
 
 def prob_kmp(mode="sample"):
