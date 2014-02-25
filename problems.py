@@ -590,3 +590,15 @@ def prob_seto(mode="sample"):
         g.write("{" + ", ".join(base.difference(a)) + "}")
         g.write("\r\n")
         g.write("{" + ", ".join(base.difference(b)) + "}")
+
+
+def prob_spec(mode="sample"):
+    """
+    Inferring Protein from Spectrum
+    """
+    with open(mode + "_inputs/SPEC.txt", "rb") as f:
+        weights = []
+        for line in f:
+            weights.append(float(line.strip()))
+    with open("answer.txt", "wb") as g:
+        g.write(rosalind.infer_protein_from_prefix_spectrum(weights).sequence)

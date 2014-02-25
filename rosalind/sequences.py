@@ -287,3 +287,16 @@ try:
     Sequence.load_mass_file(open(os.path.dirname(__file__) + "/reference_data/mass.txt"))
 except:
     pass
+
+
+def infer_protein_from_prefix_spectrum(weights):
+    diff = []
+    for i in xrange(len(weights) - 1):
+        diff.append(weights[i + 1] - weights[i])
+    aminos = []
+    for d in diff:
+        for a in Sequence.amino_mass.items():
+            if abs(d-a[1])<0.01:
+                aminos.append(a[0])
+                break
+    return Protein("", "".join(aminos))
