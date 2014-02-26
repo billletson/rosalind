@@ -285,3 +285,36 @@ def _lcs_backtrack(c, first, second, i, j):
             return _lcs_backtrack(c, first, second, i, j-1)
         else:
             return _lcs_backtrack(c, first, second, i-1, j)
+
+
+def supersequence(first, second):
+    lcs = longest_common_subsequence(first, second)
+    idx = 0
+    extra_letters = []
+    for i in xrange(len(lcs) + 1):
+        extra_letters.append("")
+    for s in first.sequence:
+        if idx >= len(lcs):
+            extra_letters[idx] += s
+        elif s == lcs.sequence[idx]:
+            idx += 1
+        else:
+            extra_letters[idx] += s
+    idx = 0
+    for s in second.sequence:
+        if idx >= len(lcs):
+            extra_letters[idx] += s
+        elif s == lcs.sequence[idx]:
+            idx += 1
+        else:
+            extra_letters[idx] += s
+    result = ""
+    for i in xrange(len(lcs)):
+        result += extra_letters[i]
+        result += lcs.sequence[i]
+    result += extra_letters[-1]
+    return DNA("Supersequence of %s and %s" % (first.name, second.name), result)
+
+
+
+

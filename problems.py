@@ -602,3 +602,14 @@ def prob_spec(mode="sample"):
             weights.append(float(line.strip()))
     with open("answer.txt", "wb") as g:
         g.write(rosalind.infer_protein_from_prefix_spectrum(weights).sequence)
+
+
+def prob_scsp(mode="sample"):
+    """
+    Interleaving Two Motifs
+    """
+    with open(mode + "_inputs/SCSP.txt", "rb") as f:
+        first = rosalind.DNA("", f.next().strip())
+        second = rosalind.DNA("", f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(rosalind.supersequence(first, second).sequence)
