@@ -289,31 +289,33 @@ def _lcs_backtrack(c, first, second, i, j):
 
 def supersequence(first, second):
     lcs = longest_common_subsequence(first, second)
-    idx = 0
-    extra_letters = []
-    for i in xrange(len(lcs) + 1):
-        extra_letters.append("")
-    for s in first.sequence:
-        if idx >= len(lcs):
-            extra_letters[idx] += s
-        elif s == lcs.sequence[idx]:
-            idx += 1
-        else:
-            extra_letters[idx] += s
-    idx = 0
-    for s in second.sequence:
-        if idx >= len(lcs):
-            extra_letters[idx] += s
-        elif s == lcs.sequence[idx]:
-            idx += 1
-        else:
-            extra_letters[idx] += s
+    extra_letters = _find_lcs_interleave_spots(first.sequence, lcs.sequence)
+    extra_letters = _find_lcs_interleave_spots(second.sequence, lcs.sequence, extra_letters)
     result = ""
     for i in xrange(len(lcs)):
         result += extra_letters[i]
         result += lcs.sequence[i]
     result += extra_letters[-1]
     return DNA("Supersequence of %s and %s" % (first.name, second.name), result)
+
+
+def _find_lcs_interleave_spots(main, lcs, extra_letters=None):
+    if extra_letters is None:
+        extra_letters = []
+        for i in xrange(len(lcs) + 1):
+            extra_letters.append("")
+    idx = 0
+    for s in main:
+        if idx >= len(lcs):
+            extra_letters[idx] += s
+        elif s == lcs[idx]:
+            idx += 1
+        else:
+            extra_letters[idx] += s
+    return extra_letters
+
+
+
 
 
 
