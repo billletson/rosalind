@@ -101,5 +101,8 @@ problems.prob_spec()
 assert filecmp.cmp("answer.txt", "sample_answers/SPEC.txt")
 problems.prob_scsp()
 assert filecmp.cmp("answer.txt", "sample_answers/SCSP.txt")
+problems.prob_motz()
+assert filecmp.cmp("answer.txt", "sample_answers/MOTZ.txt")
+
 
 print "tests pass"
