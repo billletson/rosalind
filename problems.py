@@ -432,7 +432,7 @@ def prob_cat(mode="sample"):
     with open(mode + "_inputs/CAT.txt", "rb") as f:
         rna = rosalind.load_fasta_file(f, "RNA")[0]
     with open("answer.txt", "wb") as g:
-        g.write(str(rna.perfect_noncrossing_matchings() % 1000000))
+        g.write(str(rna.noncrossing_matchings() % 1000000))
 
 
 def prob_kmp(mode="sample"):
@@ -613,3 +613,13 @@ def prob_scsp(mode="sample"):
         second = rosalind.DNA("", f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(rosalind.supersequence(first, second).sequence)
+
+
+def prob_motz(mode="sample"):
+    """
+    Catalan Numbers and RNA Secondary Structures
+    """
+    with open(mode + "_inputs/MOTZ.txt", "rb") as f:
+        rna = rosalind.load_fasta_file(f, "RNA")[0]
+    with open("answer.txt", "wb") as g:
+        g.write(str(rna.noncrossing_matchings(False) % 1000000))

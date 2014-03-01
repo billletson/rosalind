@@ -3,6 +3,7 @@ import re
 from collections import defaultdict
 import itertools
 import os
+import sys
 
 
 class Sequence:
@@ -214,7 +215,8 @@ class RNA(Sequence):
         return reduce(op.mul, xrange(max(cnt_a, cnt_u), abs(cnt_a-cnt_u), -1)) * \
                reduce(op.mul, xrange(max(cnt_g, cnt_c), abs(cnt_g-cnt_c), -1))
 
-    def perfect_noncrossing_matchings(self):
+    def noncrossing_matchings(self, perfect=True):
+        sys.setrecursionlimit(2000)
         class Crossings(dict):
             def set_sequence(self, sequence):
                 self.sequence = sequence
@@ -226,7 +228,7 @@ class RNA(Sequence):
                 if start > end:
                     self[key] = 1
                     return 1
-                if (end - start) % 2 == 0:
+                if perfect and (end - start) % 2 == 0:
                     return 0
                 for x in xrange(start + 1, end+1):
                     if self.sequence[start] == "A" and self.sequence[x] == "U" or \
@@ -234,6 +236,8 @@ class RNA(Sequence):
                        self.sequence[start] == "C" and self.sequence[x] == "G" or \
                        self.sequence[start] == "G" and self.sequence[x] == "C":
                         self[key] += (self[(start + 1, x - 1)] * self[(x + 1, end)])
+                if not perfect:
+                    self[key] += self[(start + 1, end)]
                 return self[key]
 
         cross = Crossings()
