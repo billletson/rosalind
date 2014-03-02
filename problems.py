@@ -623,3 +623,14 @@ def prob_motz(mode="sample"):
         rna = rosalind.load_fasta_file(f, "RNA")[0]
     with open("answer.txt", "wb") as g:
         g.write(str(rna.noncrossing_matchings(False) % 1000000))
+
+
+def prob_trie(mode="sample"):
+    """
+    Introduction to Pattern Matching
+    """
+    with open(mode + "_inputs/TRIE.txt", "rb") as f:
+        words = [line.strip() for line in f]
+    trie = rosalind.Trie(words)
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(sorted(trie.edges_as_strings(True))))
