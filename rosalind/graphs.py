@@ -137,6 +137,14 @@ class Tree():
                 break
         return common_path
 
+    def nontrivial_characters(self):
+        node_names = sorted(self.root.node_names())
+        nodes = self.root.nodes_with_children()
+        nodes.remove(self.root)
+        name_characters = [node.node_names() for node in nodes]
+        binary_characters = ["".join(["1" if name in nc else "0" for name in node_names]) for nc in name_characters]
+        return binary_characters
+
     def _find_path(self, name):
         return self.root.find_path(name)
 
@@ -156,6 +164,26 @@ class Node():
                 return [i] + path
         else:
             return None
+
+    def nodes_with_children(self):
+        ret = []
+        if self.children:
+            ret.append(self)
+            for child in self.children:
+                ret += child.nodes_with_children()
+        return ret
+
+    def node_names(self):
+        ret = []
+        if self.name != "":
+            ret.append(self.name)
+        if self.children:
+            for child in self.children:
+                ret += child.node_names()
+        return ret
+
+
+
 
 
 
