@@ -652,6 +652,23 @@ def prob_nwck(mode="sample"):
                 sets.append((newick, first, second))
                 newick = ""
     with open("answer.txt", "wb") as g:
-        #trees = [rosalind.Tree(x[0]) for x in sets]
-        #print trees[1].root.children[1].name
         g.write(" ".join([str(rosalind.Tree(x[0]).find_distance(x[1], x[2])) for x in sets]))
+
+
+def prob_nkew(mode="sample"):
+    """
+    Newick Format with Edge Weights
+    """
+    with open(mode + "_inputs/NKEW.txt", "rb") as f:
+        sets = []
+        newick = ""
+        for line in f:
+            line = line.strip()
+            if line and line[-1] == ";":
+                newick = line
+            elif newick:
+                first, second = line.split()
+                sets.append((newick, first, second))
+                newick = ""
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join([str(int(rosalind.Tree(x[0]).find_distance(x[1], x[2]))) for x in sets]))

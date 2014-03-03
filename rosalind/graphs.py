@@ -72,18 +72,20 @@ class Trie:
 
 class Tree():
     def __init__(self, newick):
-        self.root = self.parse_to_node(newick)
+        self.root = self._parse_to_node(newick)
 
-    def parse_to_node(self, newick):
+    def _parse_to_node(self, newick):
         if not newick:
             return Node(newick)
         if newick[-1] == ";":
             newick = newick[:-1]
         if newick[0] != "(":
-            return Node(newick)
+            name, weight = self._separate_weight(newick)
+            return Node(name, weight)
         for i in xrange(len(newick)-1, 0, -1):
             if newick[i] == ")":
-                node = Node(newick[i + 1:])
+                name, weight = self._separate_weight(newick[i + 1:])
+                node = Node(name, weight)
                 remainder = newick[1:i]
                 children = []
                 paren_count = 0
@@ -97,16 +99,27 @@ class Tree():
                         children.append(remainder[last_split + 1:j])
                         last_split = j
                 children.append(remainder[last_split + 1:])
-                node.children = [self.parse_to_node(child) for child in children]
+                node.children = [self._parse_to_node(child) for child in children]
                 return node
 
-    def find_distance(self, first, second):
-        first_path = self.find_path(first)
-        second_path = self.find_path(second)
-        common_path = self.find_common_ancestor_path(first_path, second_path)
-        return self.distance_from_root_by_path(first_path) + self.distance_from_root_by_path(second_path) - 2 * self.distance_from_root_by_path(common_path)
+    @classmethod
+    def _separate_weight(self, text):
+        if ":" in text:
+            name, weight = text.split(":")
+            weight = float(weight)
+        else:
+            name = text
+            weight = 1
+        return name, weight
 
-    def distance_from_root_by_path(self, path):
+    def find_distance(self, first, second):
+        first_path = self._find_path(first)
+        second_path = self._find_path(second)
+        common_path = self._find_common_ancestor_path(first_path, second_path)
+        return self._distance_from_root_by_path(first_path) + self._distance_from_root_by_path(second_path) \
+               - 2 * self._distance_from_root_by_path(common_path)
+
+    def _distance_from_root_by_path(self, path):
         distance = 0
         current_node = self.root
         for branch in path:
@@ -114,7 +127,8 @@ class Tree():
             distance += current_node.distance
         return distance
 
-    def find_common_ancestor_path(self, first_path, second_path):
+    @classmethod
+    def _find_common_ancestor_path(self, first_path, second_path):
         common_path = []
         for i in xrange(min(len(first_path), len(second_path))):
             if first_path[i] == second_path[i]:
@@ -123,7 +137,7 @@ class Tree():
                 break
         return common_path
 
-    def find_path(self, name):
+    def _find_path(self, name):
         return self.root.find_path(name)
 
 

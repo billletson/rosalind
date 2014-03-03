@@ -105,7 +105,8 @@ problems.prob_trie()
 assert filecmp.cmp("answer.txt", "sample_answers/TRIE.txt")
 problems.prob_nwck()
 assert filecmp.cmp("answer.txt", "sample_answers/NWCK.txt")
-
+problems.prob_nkew()
+assert filecmp.cmp("answer.txt", "sample_answers/NKEW.txt")
 
 
 print "tests pass"
