@@ -634,3 +634,24 @@ def prob_trie(mode="sample"):
     trie = rosalind.Trie(words)
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(sorted(trie.edges_as_strings(True))))
+
+
+def prob_nwck(mode="sample"):
+    """
+    Distances in Trees
+    """
+    with open(mode + "_inputs/NWCK.txt", "rb") as f:
+        sets = []
+        newick = ""
+        for line in f:
+            line = line.strip()
+            if line and line[-1] == ";":
+                newick = line
+            elif newick:
+                first, second = line.split()
+                sets.append((newick, first, second))
+                newick = ""
+    with open("answer.txt", "wb") as g:
+        #trees = [rosalind.Tree(x[0]) for x in sets]
+        #print trees[1].root.children[1].name
+        g.write(" ".join([str(rosalind.Tree(x[0]).find_distance(x[1], x[2])) for x in sets]))

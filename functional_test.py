@@ -103,6 +103,8 @@ problems.prob_scsp()
 assert filecmp.cmp("answer.txt", "sample_answers/SCSP.txt")
 problems.prob_trie()
 assert filecmp.cmp("answer.txt", "sample_answers/TRIE.txt")
+problems.prob_nwck()
+assert filecmp.cmp("answer.txt", "sample_answers/NWCK.txt")
 
 
 
