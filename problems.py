@@ -682,3 +682,13 @@ def prob_ctbl(mode="sample"):
         tree = rosalind.Tree(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(tree.nontrivial_characters()))
+
+
+def prob_indc(mode="sample"):
+    """
+    Independent Segregation of Chromosomes
+    """
+    with open(mode + "_inputs/INDC.txt", "rb") as f:
+        n = int(f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(" ".join(["%0.8f" % x for x in reversed(rosalind.binomial_cdf(2*n, 0.5, True))]))

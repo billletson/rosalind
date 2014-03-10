@@ -1,4 +1,5 @@
 import itertools
+import math
 
 
 def punnett_probabilities(k, m, n):
@@ -96,3 +97,32 @@ def expected_restriction_sites(str_len, substring, gc_content):
         else:
             same_length_prob *= (1 - gc_content) / 2
     return same_length_prob * (str_len - len(substring) + 1)
+
+
+def binomial_success_probability(n, k, p, log=False):
+    if log:
+        return math.log10(combinations(n, k)) + k * math.log10(p) * (n - k) + (n - k) * math.log10(1 - p)
+    else:
+        return combinations(n, k) * p ** k * p ** (n - k)
+
+
+def binomial_cdf(n, p, log=False):
+    probs = [binomial_success_probability(n, i, p, log) for i in xrange(n + 1)]
+    print logsumexp(probs[:-1])
+    cdf = [probs[0]]
+    print cdf
+    for i in xrange(1, len(probs)):
+        if log:
+            cdf.append(logsumexp([probs[i], cdf[-1]]))
+        else:
+            cdf.append(probs[i] + cdf[-1])
+    return cdf
+
+
+def logsumexp(x):
+    a = max(x)
+    return a + math.log10(sum([10**(y - a) for y in x]))
+
+
+
+
