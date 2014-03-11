@@ -691,4 +691,4 @@ def prob_indc(mode="sample"):
     with open(mode + "_inputs/INDC.txt", "rb") as f:
         n = int(f.next().strip())
     with open("answer.txt", "wb") as g:
-        g.write(" ".join(["%0.8f" % x for x in reversed(rosalind.binomial_cdf(2*n, 0.5, True))]))
+        g.write(" ".join(["%0.3f" % x for x in reversed(rosalind.binomial_cdf(2*n, 0.5, True)[0:-1])]))
