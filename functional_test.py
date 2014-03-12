@@ -111,6 +111,8 @@ problems.prob_ctbl()
 assert filecmp.cmp("answer.txt", "sample_answers/CTBL.txt")
 problems.prob_indc()
 assert filecmp.cmp("answer.txt", "sample_answers/INDC.txt")
+problems.prob_dbru()
+assert filecmp.cmp("answer.txt", "sample_answers/DBRU.txt")
 
 
 print "tests pass"

@@ -183,6 +183,15 @@ class Node():
         return ret
 
 
+def debruijn(dnas):
+    adjacencies = []
+    for dna in dnas:
+        adjacencies.append((dna.sequence[:-1], dna.sequence[1:]))
+        rc = dna.reverse_complement()
+        adjacencies.append((rc.sequence[:-1], rc.sequence[1:]))
+    return set(adjacencies)
+
+
 
 
 

@@ -692,3 +692,13 @@ def prob_indc(mode="sample"):
         n = int(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(" ".join(["%0.3f" % x for x in reversed(rosalind.binomial_cdf(2*n, 0.5, True)[0:-1])]))
+
+
+def prob_dbru(mode="sample"):
+    """
+    Constructing a De Bruijn Graph
+    """
+    with open(mode + "_inputs/DBRU.txt", "rb") as f:
+        dnas = [rosalind.DNA("", line.strip()) for line in f]
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(sorted(["(%s, %s)" % x for x in rosalind.debruijn(dnas)])))
