@@ -702,3 +702,14 @@ def prob_dbru(mode="sample"):
         dnas = [rosalind.DNA("", line.strip()) for line in f]
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(sorted(["(%s, %s)" % x for x in rosalind.debruijn(dnas)])))
+
+
+def prob_conv(mode="sample"):
+    """
+    Comparing Spectra with the Spectral Convolution
+    """
+    with open(mode + "_inputs/CONV.txt", "rb") as f:
+        spectra = [map(float, line.strip().split()) for line in f]
+    with open("answer.txt", "wb") as g:
+        mink = rosalind.minkowski_difference(spectra[0], spectra[1])
+        g.write("\r\n".join([str(mink.count(mink[0])), str(mink[0])]))

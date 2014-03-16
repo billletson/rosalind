@@ -315,3 +315,10 @@ def _find_lcs_interleave_spots(main, lcs, extra_letters=None):
     return extra_letters
 
 
+def minkowski_difference(first, second, sort=True, precision=5):
+    #mink = [x[0] - x[1] for x in itertools.product(first, second)]
+    mink = [round(x - y, precision) for x in first for y in second]
+    if sort:
+        mink = sorted(mink, key=mink.count, reverse=True)
+    #print [mink.count(x) for x in mink]
+    return mink
