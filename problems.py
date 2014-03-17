@@ -713,3 +713,13 @@ def prob_conv(mode="sample"):
     with open("answer.txt", "wb") as g:
         mink = rosalind.minkowski_difference(spectra[0], spectra[1])
         g.write("\r\n".join([str(mink.count(mink[0])), str(mink[0])]))
+
+
+def prob_rnas(mode="sample"):
+    """
+    Wobble Bonding and RNA Secondary Structures
+    """
+    with open(mode + "_inputs/RNAS.txt", "rb") as f:
+        rna = rosalind.RNA("", f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(str(rna.noncrossing_matchings(False, True, 4)))

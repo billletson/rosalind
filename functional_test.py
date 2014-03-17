@@ -115,6 +115,8 @@ problems.prob_dbru()
 assert filecmp.cmp("answer.txt", "sample_answers/DBRU.txt")
 problems.prob_conv()
 assert filecmp.cmp("answer.txt", "sample_answers/CONV.txt")
+problems.prob_rnas()
+assert filecmp.cmp("answer.txt", "sample_answers/RNAS.txt")
 
 
 print "tests pass"
