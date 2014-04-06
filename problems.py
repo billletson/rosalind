@@ -723,3 +723,14 @@ def prob_rnas(mode="sample"):
         rna = rosalind.RNA("", f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(str(rna.noncrossing_matchings(False, True, 4)))
+
+
+def prob_full(mode="sample"):
+    """
+    Inferring Peptide from Full Spectrum
+    """
+    with open(mode + "_inputs/FULL.txt", "rb") as f:
+        total = float(f.next().strip())
+        ions = [float(x.strip()) for x in f]
+    with open("answer.txt", "wb") as g:
+        g.write("".join(rosalind.infer_peptide_from_full_spectrum(total, ions).sequence))

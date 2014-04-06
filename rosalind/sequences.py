@@ -296,14 +296,32 @@ except:
     pass
 
 
-def infer_protein_from_prefix_spectrum(weights):
+def infer_protein_from_prefix_spectrum(weights, epsilon=0.01):
     diff = []
     for i in xrange(len(weights) - 1):
         diff.append(weights[i + 1] - weights[i])
     aminos = []
     for d in diff:
         for a in Sequence.amino_mass.items():
-            if abs(d-a[1])<0.01:
+            if abs(d - a[1]) < epsilon:
                 aminos.append(a[0])
                 break
+    return Protein("", "".join(aminos))
+
+
+def infer_peptide_from_full_spectrum(total, ions, epsilon=0.01):
+    aminos = []
+    ions.sort()
+    current_ion = 0
+    next_ion = 1
+    while next_ion < len(ions) and len(aminos) < (len(ions) - 2) / 2:
+        test = ions[next_ion] - ions[current_ion]
+        for a in Sequence.amino_mass.items():
+            if abs(test - a[1]) < epsilon:
+                aminos.append(a[0])
+                current_ion = next_ion
+                next_ion += 1
+                break
+        else:
+            next_ion += 1
     return Protein("", "".join(aminos))
