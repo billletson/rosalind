@@ -70,7 +70,7 @@ class Trie:
         return strings
 
 
-class Tree():
+class Tree:
     def __init__(self, newick):
         self.root = self._parse_to_node(newick)
 
@@ -149,7 +149,7 @@ class Tree():
         return self.root.find_path(name)
 
 
-class Node():
+class Node:
     def __init__(self, name=None, distance=1):
         self.name = name
         self.distance = distance
@@ -190,6 +190,89 @@ def debruijn(dnas):
         rc = dna.reverse_complement()
         adjacencies.append((rc.sequence[:-1], rc.sequence[1:]))
     return set(adjacencies)
+
+
+class SuffixTree:
+    """
+    Implementation of  Ukkonen's algorithm for growing the tree
+    See: http://www.stanford.edu/~mjkay/gusfield.pdf
+    """
+    def __init__(self, word):
+        self.word = word
+        self.nodes = [SuffixNode(0, 0, downstream=[1]), SuffixNode(0, 1, upstream=0)]
+        for i in xrange(1, len(word)):
+            for j in xrange(i + 1):
+                self.extend(j, i)
+
+    def __repr__(self):
+        return "\n".join([self.word] + [repr(x) for x in self.nodes])
+
+    def extend(self, j, i):
+        print self.word[j:i]
+        path, end_node, end_index = self.find_path(self.word[j:i])
+        if not self.nodes[end_node].downstream and end_index + 1 == self.nodes[end_node].edge_length:
+            #Rule 1
+            print "Rule 1"
+            self.nodes[end_node].edge_length += 1
+        elif end_index + 1 == self.nodes[end_node].edge_length:
+            if self.word[self.nodes[end_node].edge_start + end_index] == self.word[i]:
+                print "Rule 3"
+                #Rule 3
+                pass
+            else:
+                print "Rule 2, at node"
+                #Rule 2, with branch at current node
+                self.nodes[end_node].downstream.append(len(self.nodes))
+                self.nodes.append(SuffixNode(i + 1, 1, end_node))
+        else:
+            for x in self.nodes[end_node]:
+                print "Rule 3"
+                #Rule 3
+                if self.word[self.nodes[x].edge_start] == self.word[i]:
+                    break
+            else:
+                print "Rule 2, within edge"
+                #Rule 2, with brand within edge
+                above = self.nodes[end_node.upstream]
+                mid = len(self.nodes)
+                self.nodes[above].downstream = [mid]
+                self.nodes[end_node].upstream = mid
+                self.nodes.append(SuffixNode(self.nodes[end_node].edge_start, end_index + 1, above, [end_node, mid + 1]))
+                self.nodes.append(SuffixNode(i + 1, 1, mid))
+                self.nodes[end_node].edge_start += end_index + 1
+                self.nodes[end_node].edge_length -= end_index + 1
+
+    def find_path(self, string):
+        node_index = 0
+        edge_index = 0
+        path = [0]
+        for letter in string:
+            if edge_index >= self.nodes[node_index].edge_length:
+                for x in self.nodes[node_index].downstream:
+                    if letter == self.word[self.nodes[x].edge_start]:
+                        node_index = x
+                        edge_index = 1
+                        path.append(x)
+                        break
+                else:
+                    return None
+            else:
+                if letter == self.word[self.nodes[node_index].edge_start + edge_index]:
+                    edge_index += 1
+                else:
+                    return None
+        return path, node_index, edge_index - 1
+
+
+class SuffixNode:
+    def __init__(self, edge_start, edge_length, upstream=None, downstream=[]):
+        self.edge_start = edge_start
+        self.edge_length = edge_length
+        self.upstream = upstream
+        self.downstream = downstream
+
+    def __repr__(self):
+        return "Start:%s, Length:%s, Upstream:%s, Downstream:%s" % (self.edge_start, self.edge_length, self.upstream, self.downstream)
 
 
 
