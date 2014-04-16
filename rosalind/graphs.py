@@ -208,33 +208,21 @@ class SuffixTree:
         return "\n".join(["String: " + self.word] + [repr(x) for x in self.nodes])
 
     def extend(self, j, i):
-        print self
-        print self.word[j:i]
         path, end_node, end_index = self.find_path(self.word[j:i])
         if not self.nodes[end_node].downstream and end_index + 1 == self.nodes[end_node].edge_length:
             #Rule 1
-            print "Rule 1"
             self.nodes[end_node].edge_length += 1
         elif end_index + 1 == self.nodes[end_node].edge_length:
             for x in self.nodes[end_node].downstream:
                 #Rule 3
                 if self.word[self.nodes[x].edge_start] == self.word[i]:
-                    print "Rule 3"
                     break
             else:
-                print "Rule 2, at node"
                 #Rule 2, with branch at current node
                 self.nodes[end_node].downstream.append(len(self.nodes))
                 self.nodes.append(SuffixNode(i, 1, end_node))
         else:
-            print end_node
-            if self.word[self.nodes[end_node].edge_start + end_index] == self.word[i]:
-                print "Rule 3"
-                #Rule 3
-                pass
-
-            else:
-                print "Rule 2, within edge"
+            if self.word[self.nodes[end_node].edge_start + end_index + 1] != self.word[i]:
                 #Rule 2, with brand within edge
                 above = self.nodes[end_node].upstream
                 mid = len(self.nodes)
