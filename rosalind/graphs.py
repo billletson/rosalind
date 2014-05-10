@@ -201,29 +201,62 @@ class SuffixTree:
         self.word = word
         self.nodes = [SuffixNode(0, 0, downstream=[1]), SuffixNode(0, 1, upstream=0)]
         for i in xrange(1, len(word)):
+            inserted = None
+            active_node = 0
             for j in xrange(i + 1):
-                self.extend(j, i)
+                active_node, rule3, inserted = self.extend(j, i, active_node, inserted)
+                if rule3:
+                    break
 
     def __repr__(self):
         return "\n".join(["String: " + self.word] + [repr(x) for x in self.nodes])
 
-    def extend(self, j, i):
-        path, end_node, end_index = self.find_path(self.word[j:i])
+    def extend(self, j, i, active_node=0, inserted=None):
+        """
+        Extends and returns:
+        The node to which the suffix was added (if added inside an edge, the node above the edge)
+        Whether rule three was invoked, meaning we can skip the rest of the step
+        If a new node was created from splitting an edge, what that node is, allowing for creation of a suffix link
+        """
+        # Node 1 is always the full string, can increment its length each time
+        if j == 0:
+            self.nodes[1].edge_length += 1
+            return 1, False, None
+
+        backtracking = True
+        back_distance = 0
+        while backtracking:
+            if self.nodes[active_node].upstream is None:
+                back_distance = 0
+                backtracking = False
+            elif self.nodes[active_node].suffix_link is not None:
+                active_node = self.nodes[active_node].suffix_link
+                backtracking = False
+            else:
+                back_distance += self.nodes[active_node].edge_length
+                active_node = self.nodes[active_node].upstream
+        if back_distance > 0:
+            j = i - back_distance + 1
+        path, end_node, end_index = self.find_path(self.word[j:i], active_node)
+
         if not self.nodes[end_node].downstream and end_index + 1 == self.nodes[end_node].edge_length:
-            #Rule 1
+            # Rule 1 - ending at a leaf (not along the edge leading to a leaf)
             self.nodes[end_node].edge_length += 1
+            return end_node, False, None
         elif end_index + 1 == self.nodes[end_node].edge_length:
             for x in self.nodes[end_node].downstream:
-                #Rule 3
                 if self.word[self.nodes[x].edge_start] == self.word[i]:
-                    break
+                    # Rule 3 - Letter to insert is the first letter of an edge leading to a child node
+                    return x, True, None
             else:
-                #Rule 2, with branch at current node
+                # Rule 2, with branch at current node (current node has children, but none start with letter to
+                # be inserted)
                 self.nodes[end_node].downstream.append(len(self.nodes))
                 self.nodes.append(SuffixNode(i, 1, end_node))
+                return len(self.nodes) - 1, False, None
         else:
             if self.word[self.nodes[end_node].edge_start + end_index + 1] != self.word[i]:
-                #Rule 2, with brand within edge
+                # Rule 2, current ends within an edge, next letter on the edge is not the letter to be inserted
                 above = self.nodes[end_node].upstream
                 mid = len(self.nodes)
                 self.nodes[above].downstream.remove(end_node)
@@ -233,13 +266,19 @@ class SuffixTree:
                 self.nodes.append(SuffixNode(i, 1, mid))
                 self.nodes[end_node].edge_start += end_index + 1
                 self.nodes[end_node].edge_length -= end_index + 1
+                if inserted is not None:
+                    self.nodes[inserted].suffix_link = mid
+                return mid, False, mid
+            else:
+                # Rule 3, letter to be inserted is the next along the current edge
+                return end_node, True, None
 
-    def find_path(self, string):
+    def find_path(self, string, start=0):
         if not string:
             return [0], 0, -1
-        node_index = 0
-        edge_index = 0
-        path = [0]
+        node_index = start
+        edge_index = self.nodes[start].edge_length
+        path = [start]
         for letter in string:
             if edge_index >= self.nodes[node_index].edge_length:
                 for x in self.nodes[node_index].downstream:
@@ -249,24 +288,30 @@ class SuffixTree:
                         path.append(x)
                         break
                 else:
-                    return None
+                    print "UH OH"
+                    print self
+                    print start
+                    print string
+                    return None, None, None
             else:
                 if letter == self.word[self.nodes[node_index].edge_start + edge_index]:
                     edge_index += 1
                 else:
-                    return None
+                    return None, None, None
         return path, node_index, edge_index - 1
 
 
 class SuffixNode:
-    def __init__(self, edge_start, edge_length, upstream=None, downstream=[]):
+    def __init__(self, edge_start, edge_length, upstream=None, downstream=[], suffix_link=None):
         self.edge_start = edge_start
         self.edge_length = edge_length
         self.upstream = upstream
         self.downstream = downstream
+        self.suffix_link = suffix_link
 
     def __repr__(self):
-        return "Start:%s, Length:%s, Upstream:%s, Downstream:%s" % (self.edge_start, self.edge_length, self.upstream, self.downstream)
+        return "Start:%s, Length:%s, Upstream:%s, Downstream:%s, Suffix Link:%s" % \
+               (self.edge_start, self.edge_length, self.upstream, self.downstream, self.suffix_link)
 
 
 
