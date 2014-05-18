@@ -3,16 +3,19 @@ class SuffixTree:
     Implementation of  Ukkonen's algorithm for growing the tree
     See: http://www.stanford.edu/~mjkay/gusfield.pdf
     """
-    def __init__(self, word):
-        self.word = word
+    def __init__(self, word, end_of_word="$"):
+        if word[-1] != end_of_word:
+            self.word = word + end_of_word
+        else:
+            self.word = word
         self._e = SuffixEndPoint()
         self.nodes = [SuffixNode(0, 0, downstream=[1]), SuffixNode(0, self._e, upstream=0)]
         rule3 = 0
-        for i in xrange(1, len(word)):
+        for i in xrange(1, len(self.word)):
             inserted = None
             active_node = 0
             for j in xrange(rule3, i + 1):
-                active_node, rule3, inserted = self.extend(j, i, active_node, inserted)
+                active_node, rule3, inserted = self._extend(j, i, active_node, inserted)
                 if rule3:
                     break
             self._e.increment()
@@ -20,7 +23,7 @@ class SuffixTree:
     def __repr__(self):
         return "\n".join(["String: " + self.word] + [repr(x) for x in self.nodes])
 
-    def extend(self, j, i, active_node=0, inserted=None):
+    def _extend(self, j, i, active_node=0, inserted=None):
         """
         Extends and returns:
         The node to which the suffix was added (if added inside an edge, the node above the edge)
@@ -127,6 +130,27 @@ class SuffixTree:
                 else:
                     return None, None, None
         return path, node_index, edge_index - 1
+
+    def count_leaves(self, node):
+        if self.nodes[node].downstream:
+            return sum([self.count_leaves(x) for x in self.nodes[node].downstream])
+        else:
+            return 1
+
+    def substring_count(self, substring):
+        path, node, index = self.find_path(substring)
+        return self.count_leaves(node)
+
+    def substring_at_node(self, node):
+        substring = ""
+        while node != 0:
+            substring = self.word[self.nodes[node].edge_start:self.nodes[node].edge_end] + substring
+            node = self.nodes[node].upstream
+        return substring
+
+    def longest_occuring_k_times(self, k):
+        potentials = [self.substring_at_node(node) for node in xrange(len(self.nodes)) if self.count_leaves(node) >= k]
+        return max(potentials, key=len)
 
 
 class SuffixNode:

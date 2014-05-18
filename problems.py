@@ -734,3 +734,14 @@ def prob_full(mode="sample"):
         ions = [float(x.strip()) for x in f]
     with open("answer.txt", "wb") as g:
         g.write("".join(rosalind.infer_peptide_from_full_spectrum(total, ions).sequence))
+
+
+def prob_lrep(mode="sample"):
+    """
+    Finding the Longest Multiple Repeat
+    """
+    with open(mode + "_inputs/LREP.txt", "rb") as f:
+        tree = rosalind.SuffixTree(f.next().strip())
+        k = int(f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write(tree.longest_occuring_k_times(k))

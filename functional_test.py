@@ -119,6 +119,8 @@ problems.prob_rnas()
 assert filecmp.cmp("answer.txt", "sample_answers/RNAS.txt")
 problems.prob_full()
 assert filecmp.cmp("answer.txt", "sample_answers/FULL.txt")
+problems.prob_lrep()
+assert filecmp.cmp("answer.txt", "sample_answers/LREP.txt")
 
 
 print "tests pass"
