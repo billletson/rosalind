@@ -1,6 +1,5 @@
 from collections import defaultdict
 from .sequences import *
-import sys
 
 
 def hamming(first, second):
@@ -21,6 +20,11 @@ def _string_hamming(first, second):
 
 
 def levenshtein(first, second):
+    """
+    Calculate the levenshtein distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
+    Arguments: Sequence first, Sequence second
+    Returns: int
+    """
     s = first.sequence
     t = second.sequence
     m = len(s)
@@ -74,6 +78,12 @@ def consensus(dnas):
 
 
 def difference_matrix(dnas):
+    """
+    Construct a difference matrix for a list of sequences. A difference matrix is a matrix of hamming distances/total
+    characters for each pair of sequences.
+    Arguments: Sequence[]
+    Returns: float[[]]
+    """
     return [[hamming(x, y) / float(len(x)) for y in dnas] for x in dnas]
 
 
@@ -173,6 +183,12 @@ def superstring(dnas):
 
 
 def identify_read_errors(dnas):
+    """
+    Given a list of sequences, find any that only exist once, as either themselves or a reverse complement. Return both
+    the incorrect sequence and a corrected version which is in the list twice and is a hamming distance of 1 away.
+    Arguments: DNA[] dnas
+    Return: (DNA, DNA)[]
+    """
     corrections = []
     counts = defaultdict(int)
     for dna in dnas:
@@ -188,137 +204,14 @@ def identify_read_errors(dnas):
     return corrections
 
 
-def find_reversals(original, target):
-    """
-    See paper at http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.91.3123&rep=rep1&type=pdf
-    """
-    if original == target:
-        return []
-    order = [target.index(x) for x in original]
-    return list(reversed(_recurse_find_reversals(order)))
-
-
-def _recurse_find_reversals(order):
-    breakpoints, negative_strip = _find_breakpoints(order)
-    if not breakpoints:
-        return []
-    reversals = []
-    for bp in breakpoints:
-        if bp == -1:
-            swaps = [order.index(0)]
-        elif order[bp] == len(order) - 1:
-            swaps = [order.index(order[bp] - 1)]
-        elif order[bp] == 0:
-            swaps = [order.index(order[bp] + 1)]
-        else:
-            swaps = [order.index(order[bp] - 1), order.index(order[bp] + 1)]
-        for swap in swaps:
-            candidate_order = order[:bp+1] + list(reversed(order[bp+1:swap+1])) + order[swap+1:]
-            candidate_breakpoints, negative_strip = _find_breakpoints(candidate_order)
-            reduction = len(breakpoints) - len(candidate_breakpoints)
-            if len(candidate_breakpoints) == 0:
-                return [(bp + 1, swap)]
-            if reduction > 1 or (reduction == 1 and negative_strip):
-                reversals.append(_recurse_find_reversals(candidate_order) + [(bp + 1, swap)])
-    if reversals:
-        return min(reversals, key=len)
-    else:
-        return [0] * (len(order) + 1)
-
-
-def _find_breakpoints(order):
-    breakpoints = []
-    negative_strip = False
-    if order[0] != 0:
-        breakpoints.append(-1)
-    for i in xrange(len(order) - 1):
-        if abs(order[i] - order[i + 1]) != 1:
-            breakpoints.append(i)
-        elif order[i] - order[i + 1] == 1:
-            negative_strip = True
-    return breakpoints, negative_strip
-
-
-def longest_common_subsequence(first, second):
-    c = _lcs_length(first.sequence, second.sequence)
-    sys.setrecursionlimit(1500)
-    return DNA("%s/%s LCS" % (first.name, second.name), _lcs_backtrack(c, first.sequence, second.sequence, len(first) - 1, len(second) - 1))
-
-
-def _lcs_length(first, second):
-    c = [[0 for i in xrange(len(second) + 1)] for j in xrange(len(first) + 1)]
-    for i in xrange(len(first)):
-        for j in xrange(len(second)):
-            if first[i] == second[j]:
-                if i == 0 or j == 0:
-                    c[i][j] = 1
-                else:
-                    c[i][j] = c[i-1][j-1] + 1
-            else:
-                if i == 0:
-                    up = 0
-                else:
-                    up = c[i-1][j]
-                if j == 0:
-                    left = 0
-                else:
-                    left = c[i][j-1]
-                c[i][j] = max(left, up)
-    return c
-
-
-def _lcs_backtrack(c, first, second, i, j):
-    if i == -1 or j == -1:
-        return ""
-    elif first[i] == second[j]:
-        return _lcs_backtrack(c, first, second, i-1, j-1) + first[i]
-    else:
-        if i == 0:
-            up = 0
-        else:
-            up = c[i-1][j]
-        if j == 0:
-            left = 0
-        else:
-            left = c[i][j-1]
-        if left > up:
-            return _lcs_backtrack(c, first, second, i, j-1)
-        else:
-            return _lcs_backtrack(c, first, second, i-1, j)
-
-
-def supersequence(first, second):
-    lcs = longest_common_subsequence(first, second)
-    extra_letters = _find_lcs_interleave_spots(first.sequence, lcs.sequence)
-    extra_letters = _find_lcs_interleave_spots(second.sequence, lcs.sequence, extra_letters)
-    result = ""
-    for i in xrange(len(lcs)):
-        result += extra_letters[i]
-        result += lcs.sequence[i]
-    result += extra_letters[-1]
-    return DNA("Supersequence of %s and %s" % (first.name, second.name), result)
-
-
-def _find_lcs_interleave_spots(main, lcs, extra_letters=None):
-    if extra_letters is None:
-        extra_letters = []
-        for i in xrange(len(lcs) + 1):
-            extra_letters.append("")
-    idx = 0
-    for s in main:
-        if idx >= len(lcs):
-            extra_letters[idx] += s
-        elif s == lcs[idx]:
-            idx += 1
-        else:
-            extra_letters[idx] += s
-    return extra_letters
-
-
 def minkowski_difference(first, second, sort=True, precision=5):
-    #mink = [x[0] - x[1] for x in itertools.product(first, second)]
+    """
+    Find the Minkowski difference between two multisets. Minkowksi difference is the multiset of all the differences of
+    combinations of one element of the first set and one element of the second set.
+    Arguments: float[] first, float[] second, bool sort, int precision
+    Return: float[]
+    """
     mink = [round(x - y, precision) for x in first for y in second]
     if sort:
         mink = sorted(mink, key=mink.count, reverse=True)
-    #print [mink.count(x) for x in mink]
     return mink

@@ -652,7 +652,7 @@ def prob_nwck(mode="sample"):
                 sets.append((newick, first, second))
                 newick = ""
     with open("answer.txt", "wb") as g:
-        g.write(" ".join([str(rosalind.Tree(x[0]).find_distance(x[1], x[2])) for x in sets]))
+        g.write(" ".join([str(rosalind.NewickTree(x[0]).find_distance(x[1], x[2])) for x in sets]))
 
 
 def prob_nkew(mode="sample"):
@@ -671,7 +671,7 @@ def prob_nkew(mode="sample"):
                 sets.append((newick, first, second))
                 newick = ""
     with open("answer.txt", "wb") as g:
-        g.write(" ".join([str(int(rosalind.Tree(x[0]).find_distance(x[1], x[2]))) for x in sets]))
+        g.write(" ".join([str(int(rosalind.NewickTree(x[0]).find_distance(x[1], x[2]))) for x in sets]))
 
 
 def prob_ctbl(mode="sample"):
@@ -679,7 +679,7 @@ def prob_ctbl(mode="sample"):
     Creating a Character Table
     """
     with open(mode + "_inputs/CTBL.txt", "rb") as f:
-        tree = rosalind.Tree(f.next().strip())
+        tree = rosalind.NewickTree(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(tree.nontrivial_characters()))
 
