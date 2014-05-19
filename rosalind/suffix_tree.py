@@ -17,6 +17,7 @@ class SuffixTree:
             for j in xrange(rule3, i + 1):
                 active_node, rule3, inserted = self._extend(j, i, active_node, inserted)
                 if rule3:
+                    active_node = 0
                     break
             self._e.increment()
 
@@ -39,7 +40,8 @@ class SuffixTree:
         active_node, back_distance = self._backtrack(active_node)
 
         # Skip count trick
-        if back_distance > 0:
+        j0 = j
+        if back_distance >= 0:
             j = i - back_distance
         end_node, end_index = self._skip_count(j, i, active_node)
 
@@ -51,7 +53,7 @@ class SuffixTree:
             for x in self.nodes[end_node].downstream:
                 if self.word[self.nodes[x].edge_start] == self.word[i]:
                     # Rule 3 - Letter to insert is the first letter of an edge leading to a child node
-                    return x, j - 1, None
+                    return x, j0 - 1, None
             else:
                 # Rule 2, with branch at current node (current node has children, but none start with letter to
                 # be inserted)
@@ -76,17 +78,17 @@ class SuffixTree:
                 return mid, False, mid
             else:
                 # Rule 3, letter to be inserted is the next along the current edge
-                return end_node, j - 1, None
+                return end_node, j0 - 1, None
 
     def _backtrack(self, active_node):
         if active_node == 0:
-            return 0, 0
+            return 0, -1
         back_distance = 0
         while True:
             if self.nodes[active_node].suffix_link is not None:
                 return self.nodes[active_node].suffix_link, back_distance
             elif self.nodes[active_node].upstream == 0:
-                return 0, 0
+                return 0, -1
             else:
                 back_distance += self.nodes[active_node].edge_length
                 active_node = self.nodes[active_node].upstream
@@ -144,13 +146,20 @@ class SuffixTree:
     def substring_at_node(self, node):
         substring = ""
         while node != 0:
-            substring = self.word[self.nodes[node].edge_start:self.nodes[node].edge_end] + substring
+            # subtraction here is a hack because end can be an int or object
+            substring = self.word[self.nodes[node].edge_start:self.nodes[node].edge_end - 0] + substring
             node = self.nodes[node].upstream
         return substring
 
     def longest_occuring_k_times(self, k):
         potentials = [self.substring_at_node(node) for node in xrange(len(self.nodes)) if self.count_leaves(node) >= k]
         return max(potentials, key=len)
+
+    def list_of_edges(self):
+        return [self.word[node.edge_start:node.edge_end - 0] for node in self.nodes[1:]]
+
+    def list_of_substrings(self):
+        return [self.substring_at_node(node) for node in xrange(1, len(self.nodes))]
 
 
 class SuffixNode:

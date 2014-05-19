@@ -121,6 +121,8 @@ problems.prob_full()
 assert filecmp.cmp("answer.txt", "sample_answers/FULL.txt")
 problems.prob_lrep()
 assert filecmp.cmp("answer.txt", "sample_answers/LREP.txt")
+problems.prob_suff()
+assert filecmp.cmp("answer.txt", "sample_answers/SUFF.txt")
 
 
 print "tests pass"

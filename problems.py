@@ -745,3 +745,13 @@ def prob_lrep(mode="sample"):
         k = int(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write(tree.longest_occuring_k_times(k))
+
+
+def prob_suff(mode="sample"):
+    """
+    Encoding Suffix Trees
+    """
+    with open(mode + "_inputs/SUFF.txt", "rb") as f:
+        tree = rosalind.SuffixTree(f.next().strip())
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(tree.list_of_edges()))
