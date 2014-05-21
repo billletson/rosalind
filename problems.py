@@ -755,3 +755,15 @@ def prob_suff(mode="sample"):
         tree = rosalind.SuffixTree(f.next().strip())
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(tree.list_of_edges()))
+
+
+def prob_itwv(mode="sample"):
+    """
+    Finding Disjoint Motifs in a Gene
+    """
+    with open(mode + "_inputs/ITWV.txt", "rb") as f:
+        haystack = f.next().strip()
+        needles = [line.strip() for line in f]
+    with open("answer.txt", "wb") as g:
+        matrix = rosalind.interweaveable_matrix(haystack, needles)
+        g.write("\r\n".join([" ".join(map(str, x)) for x in matrix]))
