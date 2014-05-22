@@ -27,6 +27,24 @@ def levenshtein(first, second):
     """
     s = first.sequence
     t = second.sequence
+    return _levenshtein_matrix(s, t)[len(s)][len(t)]
+
+
+def edit_distance_alignment(first, second):
+    s = first.sequence
+    t = second.sequence
+    matrix = _levenshtein_matrix(s, t)
+    s1, t1 = _levenshtein_backtrack(s, t, matrix)
+    return matrix[-1][-1], s1, t1
+
+
+def _levenshtein_matrix(s, t):
+    """
+    Calculate a matrix showing the levenshtein distance between all prefixes of two strings, with the last element
+    being the levenshtein distance between the whole two strings
+    Arguments: str s, str t
+    Returns: int[][]
+    """
     m = len(s)
     n = len(t)
     matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
@@ -40,7 +58,46 @@ def levenshtein(first, second):
                 matrix[i][j] = matrix[i - 1][j - 1]
             else:
                 matrix[i][j] = min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + 1)
-    return matrix[m][n]
+    return matrix
+
+
+def _levenshtein_backtrack(s, t, matrix):
+    """
+    Given two strings and the levenshtein distance matrix between the two, backtrack through and create an alignment.
+    Arguments: str s, str t, int[][] matrix
+    Returns: str, str
+    """
+    s1 = ""
+    t1 = ""
+    i = len(s)
+    j = len(t)
+    while i > 0 or j > 0:
+        if i == 0:
+            up = len(s)
+        else:
+            up = matrix[i - 1][j]
+        if j == 0:
+            left = len(t)
+        else:
+            left = matrix[i][j - 1]
+        if j == 0 or i == 0:
+            diag = max(len(s), len(t))
+        else:
+            diag = matrix[i - 1][j - 1]
+        if diag <= left and diag <= up:
+            i -= 1
+            j -= 1
+            s1 = s[i] + s1
+            t1 = t[j] + t1
+        elif left <= up:
+            j -= 1
+            s1 = "-" + s1
+            t1 = t[j] + t1
+        else:
+            i -= 1
+            s1 = s[i] + s1
+            t1 = "-" + t1
+    return s1, t1
 
 
 def transition_transversion(first, second):

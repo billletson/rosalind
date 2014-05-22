@@ -767,3 +767,13 @@ def prob_itwv(mode="sample"):
     with open("answer.txt", "wb") as g:
         matrix = rosalind.interweaveable_matrix(haystack, needles)
         g.write("\r\n".join([" ".join(map(str, x)) for x in matrix]))
+
+
+def prob_edta(mode="sample"):
+    """
+    Edit Distance Alignment
+    """
+    with open(mode + "_inputs/EDTA.txt", "rb") as f:
+        proteins = rosalind.load_fasta_file(f, s_type="Protein")
+    with open("answer.txt", "wb") as g:
+        g.write("\r\n".join(map(str, rosalind.edit_distance_alignment(proteins[0], proteins[1]))))
