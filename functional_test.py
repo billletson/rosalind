@@ -125,6 +125,8 @@ problems.prob_suff()
 assert filecmp.cmp("answer.txt", "sample_answers/SUFF.txt")
 problems.prob_itwv()
 assert filecmp.cmp("answer.txt", "sample_answers/ITWV.txt")
+problems.prob_ctea()
+assert filecmp.cmp("answer.txt", "sample_answers/CTEA.txt")
 
 
 

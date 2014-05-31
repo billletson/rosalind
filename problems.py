@@ -777,3 +777,14 @@ def prob_edta(mode="sample"):
         proteins = rosalind.load_fasta_file(f, s_type="Protein")
     with open("answer.txt", "wb") as g:
         g.write("\r\n".join(map(str, rosalind.edit_distance_alignment(proteins[0], proteins[1]))))
+
+
+def prob_ctea(mode="sample"):
+    """
+    Counting Optimal Alignments
+    """
+    with open(mode + "_inputs/CTEA.txt", "rb") as f:
+        proteins = rosalind.load_fasta_file(f, s_type="Protein")
+    with open("answer.txt", "wb") as g:
+        g.write(str(rosalind.optimal_alignment_count(proteins[0], proteins[1], 134217727)))
+
