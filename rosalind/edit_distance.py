@@ -123,3 +123,11 @@ class _Memoizer(dict):
         if self.modulus is not None:
             self[key] %= self.modulus
         return self[key]
+
+
+class _DefaultMatrix(dict):
+    def __missing__(self, key):
+        if key[0] == key[1]:
+            return 0
+        else:
+            return 1

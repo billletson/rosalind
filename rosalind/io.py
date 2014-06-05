@@ -51,3 +51,19 @@ def load_fasta_uniprot(uniprot_id, s_type="Protein"):
         return DNA(uniprot_id, sequence)
     else:
         return Protein(uniprot_id, sequence)
+
+
+def load_scoring_matrix(matrix_type):
+    """
+    Returns a dict representing a scoring matrix. Inversion is because this package uses modifications of the
+    levenshtein distance rather than postive alignment scores under the covers.
+    """
+    matrix = {}
+    with open(os.path.dirname(__file__) + ("/reference_data/%s.txt" % matrix_type), 'rb') as f:
+        header = f.next().strip().split()
+        for line in f:
+            values = line.strip().split()
+            for i in xrange(1, len(values)):
+                matrix[(header[i - 1], values[0])] = int(values[i]) * -1
+    return matrix
+
