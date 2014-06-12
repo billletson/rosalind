@@ -127,7 +127,8 @@ problems.prob_itwv()
 assert filecmp.cmp("answer.txt", "sample_answers/ITWV.txt")
 problems.prob_ctea()
 assert filecmp.cmp("answer.txt", "sample_answers/CTEA.txt")
-
+problems.prob_glob()
+assert filecmp.cmp("answer.txt", "sample_answers/GLOB.txt")
 
 
 print "tests pass"

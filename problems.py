@@ -788,3 +788,12 @@ def prob_ctea(mode="sample"):
     with open("answer.txt", "wb") as g:
         g.write(str(rosalind.optimal_alignment_count(proteins[0], proteins[1], 134217727)))
 
+
+def prob_glob(mode="sample"):
+    """
+    Global Alignment with Scoring Matrix
+    """
+    with open(mode + "_inputs/GLOB.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write(str(-1 * rosalind.levenshtein(dnas[0], dnas[1], "BLOSUM62", 5)))

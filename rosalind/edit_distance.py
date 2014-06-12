@@ -1,46 +1,59 @@
 import sys
+from .io import load_scoring_matrix
 
 
-def levenshtein(first, second):
+def levenshtein(first, second, scoring_matrix=None, gap=1):
     """
     Calculate the levenshtein distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
-    Arguments: Sequence first, Sequence second
+    Can take a custom scoring matrix and gap penalty
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
     Returns: int
     """
+    if scoring_matrix is None:
+        scoring = _DefaultMatrix()
+    else:
+        scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    return _levenshtein_matrix(s, t)[len(s)][len(t)]
+    return _levenshtein_matrix(s, t, scoring, gap)[len(s)][len(t)]
 
 
-def edit_distance_alignment(first, second):
+def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Find an optimal alignment minimizing edit distance between two sequences, return the distance and a pair of
     strings representing an optimal alignment.
     Arguments: Sequence first, Sequence second
     Returns: int, str, str
     """
+    if scoring_matrix is None:
+        scoring = _DefaultMatrix()
+    else:
+        scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    matrix = _levenshtein_matrix(s, t)
+    matrix = _levenshtein_matrix(s, t, scoring, gap)
     s1, t1 = _levenshtein_backtrack(s, t, matrix)
     return matrix[-1][-1], s1, t1
 
 
-def optimal_alignment_count(first, second, modulus=None):
+def optimal_alignment_count(first, second, modulus=None, scoring_matrix=None, gap=1):
     """
     Finds the number of valid optimal alignments for a pair of sequences. As this can get large, can return modulo
     some number.
     Arguments: Sequence first, Sequence second, modulus int or None
     Returns: int
     """
-    sys.setrecursionlimit(10000)
+    if scoring_matrix is None:
+        scoring = _DefaultMatrix()
+    else:
+        scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    matrix = _levenshtein_matrix(s, t)
+    matrix = _levenshtein_matrix(s, t, scoring, gap)
     return _count_alignments(s, t, matrix, modulus)
 
 
-def _levenshtein_matrix(s, t):
+def _levenshtein_matrix(s, t, scoring, gap):
     """
     Calculate a matrix showing the levenshtein distance between all prefixes of two strings, with the last element
     being the levenshtein distance between the whole two strings
@@ -51,15 +64,12 @@ def _levenshtein_matrix(s, t):
     n = len(t)
     matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
     for i in xrange(m+1):
-        matrix[i][0] = i
+        matrix[i][0] = i * gap
     for i in xrange(n+1):
-        matrix[0][i] = i
+        matrix[0][i] = i * gap
     for j in xrange(1, n + 1):
         for i in xrange(1, m + 1):
-            if s[i - 1] == t[j - 1]:
-                matrix[i][j] = matrix[i - 1][j - 1]
-            else:
-                matrix[i][j] = min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + 1)
+            matrix[i][j] = min(matrix[i - 1][j] + gap, matrix[i][j - 1] + gap, matrix[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])])
     return matrix
 
 
