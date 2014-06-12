@@ -1,5 +1,6 @@
 import sys
 
+
 def levenshtein(first, second):
     """
     Calculate the levenshtein distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
@@ -12,6 +13,12 @@ def levenshtein(first, second):
 
 
 def edit_distance_alignment(first, second):
+    """
+    Find an optimal alignment minimizing edit distance between two sequences, return the distance and a pair of
+    strings representing an optimal alignment.
+    Arguments: Sequence first, Sequence second
+    Returns: int, str, str
+    """
     s = first.sequence
     t = second.sequence
     matrix = _levenshtein_matrix(s, t)
@@ -20,13 +27,17 @@ def edit_distance_alignment(first, second):
 
 
 def optimal_alignment_count(first, second, modulus=None):
+    """
+    Finds the number of valid optimal alignments for a pair of sequences. As this can get large, can return modulo
+    some number.
+    Arguments: Sequence first, Sequence second, modulus int or None
+    Returns: int
+    """
     sys.setrecursionlimit(10000)
     s = first.sequence
     t = second.sequence
     matrix = _levenshtein_matrix(s, t)
-    memo = _Memoizer()
-    memo.set_params(matrix, s, t, modulus)
-    return memo[(len(s), len(t))]
+    return _count_alignments(s, t, matrix, modulus)
 
 
 def _levenshtein_matrix(s, t):
@@ -91,38 +102,28 @@ def _levenshtein_backtrack(s, t, matrix):
     return s1, t1
 
 
-class _Memoizer(dict):
-    def set_params(self, matrix, s, t, modulus=None):
-        self.matrix = matrix
-        self.s = s
-        self.t = t
-        self.modulus = modulus
-
-    def __missing__(self, key):
-        i, j = key
-        if self.matrix[i][j] == 0:
-            self[key] = 1
-            return 1
-        if i == 0:
-            self[key] = self[(i, j - 1)]
-        elif j == 0:
-            self[key] = self[(i - 1, j)]
-        else:
-            if self.s[i - 1] == self.t[j - 1]:
-                diag = self.matrix[i - 1][j - 1] - 1
+def _count_alignments(s, t, matrix, modulus=None):
+    current = [1] * (len(t) + 1)
+    for i in xrange(1, len(s) + 1):
+        prev = current
+        current = [1] * (len(t) + 1)
+        for j in xrange(1, len(t) + 1):
+            if s[i - 1] == t[j - 1]:
+                diag = matrix[i - 1][j - 1] - 1
             else:
-                diag = self.matrix[i - 1][j - 1]
-            m = min(diag, self.matrix[i - 1][j], self.matrix[i][j - 1])
-            self[key] = 0
+                diag = matrix[i - 1][j - 1]
+            m = min(diag, matrix[i - 1][j], matrix[i][j - 1])
+            alignments = 0
             if diag == m:
-                self[key] += self[(i - 1, j - 1)]
-            if self.matrix[i - 1][j] == m:
-                self[key] += self[(i - 1, j)]
-            if self.matrix[i][j - 1] == m:
-                self[key] += self[(i, j - 1)]
-        if self.modulus is not None:
-            self[key] %= self.modulus
-        return self[key]
+                alignments += prev[j - 1]
+            if matrix[i - 1][j] == m:
+                alignments += prev[j]
+            if matrix[i][j - 1] == m:
+                alignments += current[j - 1]
+            current[j] = alignments
+            if modulus is not None:
+                current[j] %= modulus
+    return current[-1]
 
 
 class _DefaultMatrix(dict):
