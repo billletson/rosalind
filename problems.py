@@ -797,3 +797,13 @@ def prob_glob(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write(str(-1 * rosalind.levenshtein(dnas[0], dnas[1], "BLOSUM62", 5)))
+
+
+def prob_mgap(mode="sample"):
+    """
+    Maximizing the Gap Symbols of an Optimal Alignment
+    """
+    with open(mode + "_inputs/MGAP.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        g.write(str(len(dnas[0]) + len(dnas[1]) - len(rosalind.longest_common_subsequence(dnas[0], dnas[1])) * 2))

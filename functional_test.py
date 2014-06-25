@@ -129,6 +129,7 @@ problems.prob_ctea()
 assert filecmp.cmp("answer.txt", "sample_answers/CTEA.txt")
 problems.prob_glob()
 assert filecmp.cmp("answer.txt", "sample_answers/GLOB.txt")
-
+problems.prob_mgap()
+assert filecmp.cmp("answer.txt", "sample_answers/MGAP.txt")
 
 print "tests pass"

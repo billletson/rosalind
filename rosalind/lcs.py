@@ -1,6 +1,5 @@
-import sys
 from .sequences import *
-
+import sys
 
 def longest_common_subsequence(first, second):
     """
@@ -9,9 +8,7 @@ def longest_common_subsequence(first, second):
     Returns: DNA
     """
     c = _lcs_length(first.sequence, second.sequence)
-    sys.setrecursionlimit(1500)
-    return DNA("%s/%s LCS" % (first.name, second.name), _lcs_backtrack(c, first.sequence, second.sequence,
-                                                                       len(first) - 1, len(second) - 1))
+    return DNA("%s/%s LCS" % (first.name, second.name), _lcs_backtrack(c, first.sequence, second.sequence))
 
 
 def _lcs_length(first, second):
@@ -42,31 +39,34 @@ def _lcs_length(first, second):
     return c
 
 
-def _lcs_backtrack(c, first, second, i, j):
+def _lcs_backtrack(c, first, second):
     """
     Given a matrix of lcs lengths of substrings, walk back through and find the characters making up the lcs of the
-    whole strings. Passing lengths i and j and the whole strings vs passing shorted strings and calculating lengths
-    might be worth examining for performance/useability.
-    Arguments: int[][] c, str first, str second, int i, int j
+    whole strings.
+    Arguments: int[][] c, str first, str second
     Returns: str
     """
-    if i == -1 or j == -1:
-        return ""
-    elif first[i] == second[j]:
-        return _lcs_backtrack(c, first, second, i-1, j-1) + first[i]
-    else:
-        if i == 0:
-            up = 0
+    i = len(first) - 1
+    j = len(second) - 1
+    lcs = ""
+    while i >= 0 or j >= 0:
+        if first[i] == second[j]:
+            lcs = first[i] + lcs
+            if i == 0 or j == 0:
+                break
+            else:
+                i -= 1
+                j -= 1
         else:
-            up = c[i-1][j]
-        if j == 0:
-            left = 0
-        else:
-            left = c[i][j-1]
-        if left > up:
-            return _lcs_backtrack(c, first, second, i, j-1)
-        else:
-            return _lcs_backtrack(c, first, second, i-1, j)
+            if i == 0:
+                j -= 1
+            elif j == 0:
+                i -= 1
+            elif c[i][j-1] > c[i-1][j]:
+                j -= 1
+            else:
+                i -= 1
+    return lcs
 
 
 def supersequence(first, second):
