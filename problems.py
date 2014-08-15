@@ -796,7 +796,7 @@ def prob_glob(mode="sample"):
     with open(mode + "_inputs/GLOB.txt", "rb") as f:
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
-        g.write(str(-1 * rosalind.levenshtein(dnas[0], dnas[1], "BLOSUM62", 5)))
+        g.write(str(rosalind.alignment_score(dnas[0], dnas[1], "BLOSUM62", 5)))
 
 
 def prob_mgap(mode="sample"):
@@ -807,3 +807,14 @@ def prob_mgap(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         g.write(str(len(dnas[0]) + len(dnas[1]) - len(rosalind.longest_common_subsequence(dnas[0], dnas[1])) * 2))
+
+
+def prob_loca(mode="sample"):
+    """
+    Local Alignment with Scoring Matrix
+    """
+    with open(mode + "_inputs/LOCA.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, a, b = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
+        g.write("\r\n".join([str(-1*score), a, b]))

@@ -64,6 +64,6 @@ def load_scoring_matrix(matrix_type):
         for line in f:
             values = line.strip().split()
             for i in xrange(1, len(values)):
-                matrix[(header[i - 1], values[0])] = int(values[i]) * -1
+                matrix[(header[i - 1], values[0])] = int(values[i])
     return matrix
 
