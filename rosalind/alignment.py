@@ -74,21 +74,13 @@ def best_local_alignment(first, second, scoring_matrix=None, gap=1):
         scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    best_local = (float('inf'), 0, 0, 0, 1)
-    # there is no way this is the most efficient search
-    for i in xrange(len(s)):
-        for j in xrange(len(t)):
-            if s[i] == t[j]:
-                matrix = _alignment_matrix(s[i:], t[j:], scoring, gap)
-                for m in xrange(len(matrix)):
-                    for n in xrange(len(matrix[0])):
-                        candidate = matrix[m][n]
-                        if candidate < best_local[0]:
-                            best_local = (candidate, i, j, i+m, j+n)
-    return best_local[0], s[best_local[1]:best_local[3]], t[best_local[2]:best_local[4]]
+    matrix = _alignment_matrix(s, t, scoring, gap, True)
+    start = _array_max_index(matrix)
+    s1, t1 = _alignment_backtrack(s, t, matrix, True, "", start)
+    return matrix[start[0]][start[1]], s1, t1
 
 
-def _alignment_matrix(s, t, scoring, gap):
+def _alignment_matrix(s, t, scoring, gap, local=False):
     """
     Calculate a matrix showing the levenshtein distance between all prefixes of two strings, with the last element
     being the levenshtein distance between the whole two strings
@@ -98,17 +90,20 @@ def _alignment_matrix(s, t, scoring, gap):
     m = len(s)
     n = len(t)
     matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    for i in xrange(m+1):
-        matrix[i][0] = i * -gap
-    for i in xrange(n+1):
-        matrix[0][i] = i * -gap
+    if not local:
+        for i in xrange(m+1):
+            matrix[i][0] = i * -gap
+        for i in xrange(n+1):
+            matrix[0][i] = i * -gap
     for j in xrange(1, n + 1):
         for i in xrange(1, m + 1):
             matrix[i][j] = max(matrix[i - 1][j] - gap, matrix[i][j - 1] - gap, matrix[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])])
+            if local and matrix[i][j] < 0:
+                matrix[i][j] = 0
     return matrix
 
 
-def _alignment_backtrack(s, t, matrix):
+def _alignment_backtrack(s, t, matrix, local=False, gap_symbol="-", start=None):
     """
     Given two strings and the levenshtein distance matrix between the two, backtrack through and create an alignment.
     Arguments: str s, str t, int[][] matrix
@@ -116,9 +111,15 @@ def _alignment_backtrack(s, t, matrix):
     """
     s1 = ""
     t1 = ""
-    i = len(s)
-    j = len(t)
+    if start is None:
+        i = len(s)
+        j = len(t)
+    else:
+        i = start[0]
+        j = start[1]
     while i > 0 or j > 0:
+        if local and matrix[i][j] == 0:
+            break
         if i == 0:
             up = len(s)
         else:
@@ -138,12 +139,12 @@ def _alignment_backtrack(s, t, matrix):
             t1 = t[j] + t1
         elif left >= up:
             j -= 1
-            s1 = "-" + s1
+            s1 = gap_symbol + s1
             t1 = t[j] + t1
         else:
             i -= 1
             s1 = s[i] + s1
-            t1 = "-" + t1
+            t1 = gap_symbol + t1
     return s1, t1
 
 
@@ -177,3 +178,14 @@ class _DefaultMatrix(dict):
             return 0
         else:
             return -1
+
+
+def _array_max_index(matrix):
+    maxes = []
+    indicies = []
+    for i in xrange(len(matrix)):
+        maxes.append(max(matrix[i]))
+        indicies.append(matrix[i].index(maxes[i]))
+    i = maxes.index(max(maxes))
+    j = indicies[i]
+    return i, j

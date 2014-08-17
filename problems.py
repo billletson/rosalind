@@ -817,4 +817,4 @@ def prob_loca(mode="sample"):
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
         score, a, b = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
-        g.write("\r\n".join([str(-1*score), a, b]))
+        g.write("\r\n".join([str(score), a, b]))
