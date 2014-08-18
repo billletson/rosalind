@@ -139,7 +139,8 @@ problems.prob_loca()
 assert filecmp.cmp("answer.txt", "sample_answers/LOCA.txt")
 problems.prob_gcon()
 assert filecmp.cmp("answer.txt", "sample_answers/GCON.txt")
-
+problems.prob_gaff()
+assert filecmp.cmp("answer.txt", "sample_answers/GAFF.txt")
 
 
 print "tests pass"

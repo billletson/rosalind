@@ -12,7 +12,7 @@ def levenshtein(first, second, scoring_matrix=None, gap=1):
     """
     Calculate the levenshtein distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
     Wraps alignment score, with a negation
-    Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: int
     """
     return -1 * alignment_score(first, second, scoring_matrix, gap)
@@ -22,7 +22,7 @@ def alignment_score(first, second, scoring_matrix=None, gap=1):
     """
     Calculate the alignment score distance between two sequences.
     Can take a custom scoring matrix and gap penalty
-    Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: int
     """
     if scoring_matrix is None:
@@ -42,7 +42,7 @@ def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Find an optimal alignment minimizing edit distance between two sequences, return the distance and a pair of
     strings representing an optimal alignment.
-    Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: int, str, str
     """
     if scoring_matrix is None:
@@ -51,16 +51,22 @@ def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
         scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    matrix = _alignment_matrix(s, t, scoring, gap)
-    s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap)
-    return -1 * matrix[-1][-1], s1, t1
+    if type(gap) == int:
+        matrix = _alignment_matrix(s, t, scoring, gap)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap)
+    else:
+        matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap)
+        s1, t1, = _alignment_backtrack_pointer(s, t, matrix, pointer)
+        for line in matrix:
+            print " ".join(map(str, line))
+    return -1*matrix[-1][-1], s1, t1
 
 
 def optimal_alignment_count(first, second, modulus=None, scoring_matrix=None, gap=1):
     """
     Finds the number of valid optimal alignments for a pair of sequences. As this can get large, can return modulo
     some number.
-    Arguments: Sequence first, Sequence second, int modulus, str scoring_matrix, int gap
+    Arguments: Sequence first, Sequence second, int modulus, str scoring_matrix, int or (int, int) gap
     Returns: int
     """
     if scoring_matrix is None:
@@ -76,7 +82,7 @@ def optimal_alignment_count(first, second, modulus=None, scoring_matrix=None, ga
 def best_local_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Finds the local alignment of a pair of sequences with the shortest edit distance.
-    Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: ?
     """
     if scoring_matrix is None:
@@ -93,9 +99,10 @@ def best_local_alignment(first, second, scoring_matrix=None, gap=1):
 
 def _alignment_matrix(s, t, scoring, gap, local=False):
     """
-    Calculate a matrix showing the levenshtein distance between all prefixes of two strings, with the last element
-    being the levenshtein distance between the whole two strings
-    Arguments: str s, str t
+    Calculate a matrix showing the alignment score between all prefixes of two strings, with the last element
+    being the alignment score between the whole two strings. Only works for a linear gap penalty, but uses less space
+    than a more general solution.
+    Arguments: str s, str t, {(str, str): int} scoring, int gap, bool local
     Returns: int[][]
     """
     m = len(s)
@@ -115,6 +122,14 @@ def _alignment_matrix(s, t, scoring, gap, local=False):
 
 
 def _affine_alignment_matrix(s, t, scoring, gap, local=False):
+    """
+    Calculate a matrix showing the alignment score between all prefixes of two strings, with the last element
+    being the alignment score between the whole two strings. Works for affine gap penalty (constant gap penalty can
+    be expressed as an affine penalty with 0 extension penalty, so this works for constant penalty too.) Uses 5 times
+    the space as the linear version, and needs to return a pointer matrix.
+    Arguments: str s, str t, {(str, str): int} scoring, int gap, bool local
+    Returns: int[][], int[][]
+    """
     m = len(s)
     n = len(t)
     open_gap, extend_gap = gap
@@ -159,8 +174,8 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
 
 def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-", start=None):
     """
-    Given two strings and the levenshtein distance matrix between the two, backtrack through and create an alignment.
-    Arguments: str s, str t, int[][] matrix
+    Given two strings and the alignment score matrix between the two, backtrack through and create an alignment.
+    Arguments: str s, str t, int[][] matrix, {(str, str): int} scoring, int gap, bool local, str gap_symbol, (int, int) start
     Returns: str, str
     """
     s1 = ""
@@ -192,7 +207,49 @@ def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-"
     return s1, t1
 
 
+def _alignment_backtrack_pointer(s, t, matrix, pointer, local=False, gap_symbol="-", start=None):
+    """
+    Given two strings and a pointer matrix, backtrack through and create an alignment. The alignment score matrix is
+    only really necessary for the local version, but will require a refactor to make optional.
+    Arguments: str s, str t, int[][] matrix, int[][] pointer, bool local, str gap_symbol, (int, int) start
+    Returns: str, str
+    """
+    s1 = ""
+    t1 = ""
+    if start is None:
+        i = len(s)
+        j = len(t)
+    else:
+        i = start[0]
+        j = start[1]
+    while i > 0 or j > 0:
+        if local and matrix[i][j] == 0:
+            break
+        if pointer[i][j] == Directions.diag:
+            i -= 1
+            j -= 1
+            s1 = s[i] + s1
+            t1 = t[j] + t1
+        elif pointer[i][j] == Directions.up:
+            i -= 1
+            s1 = s[i] + s1
+            t1 = gap_symbol + t1
+        elif pointer[i][j] == Directions.left:
+            j -= 1
+            t1 = t[j] + t1
+            s1 = gap_symbol + s1
+        else:
+            raise ValueError("Invalid pointer matrix")
+    return s1, t1
+
+
 def _count_alignments(s, t, matrix, modulus=None):
+    """
+    Using an alignment score matrix and the two original strings, count the number of optimal alignments modulo some
+    number. This currently does not work for an arbitrary scoring scheme, only the simplest default.
+    Arguments: str s, str t, int[][] matrix, int or None modulus
+    Returns: int
+    """
     current = [1] * (len(t) + 1)
     for i in xrange(1, len(s) + 1):
         prev = current
@@ -217,6 +274,9 @@ def _count_alignments(s, t, matrix, modulus=None):
 
 
 class _DefaultMatrix(dict):
+    """
+    Dict-like object for the default scoring of -1 for a substitution, 0 for a match.
+    """
     def __missing__(self, key):
         if key[0] == key[1]:
             return 0
@@ -225,6 +285,11 @@ class _DefaultMatrix(dict):
 
 
 def _array_max_index(matrix):
+    """
+    Calculates the index of the maximum of a list of lists of ints.
+    Arguments: int[][]
+    Returns: int, int
+    """
     maxes = []
     indicies = []
     for i in xrange(len(matrix)):

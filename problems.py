@@ -816,8 +816,8 @@ def prob_loca(mode="sample"):
     with open(mode + "_inputs/LOCA.txt", "rb") as f:
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
-        score, a, b = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
-        g.write("\r\n".join([str(score), a, b]))
+        score, s, t = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
+        g.write("\r\n".join([str(score), s, t]))
 
 
 def prob_gcon(mode="sample"):
@@ -829,3 +829,14 @@ def prob_gcon(mode="sample"):
     with open("answer.txt", "wb") as g:
         score = rosalind.alignment_score(dnas[0], dnas[1], "BLOSUM62", (5, 0))
         g.write(str(score))
+
+
+def prob_gaff(mode="sample"):
+    """
+    Global Alignment with Scoring Matrix and Affine Gap Penalty
+    """
+    with open(mode + "_inputs/GAFF.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, s, t = rosalind.edit_distance_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
+        g.write("\r\n".join([str(-score), s, t]))
