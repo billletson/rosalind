@@ -818,3 +818,14 @@ def prob_loca(mode="sample"):
     with open("answer.txt", "wb") as g:
         score, a, b = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
         g.write("\r\n".join([str(score), a, b]))
+
+
+def prob_gcon(mode="sample"):
+    """
+    Global Alignment with Constant Gap Penalty
+    """
+    with open(mode + "_inputs/GCON.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score = rosalind.alignment_score(dnas[0], dnas[1], "BLOSUM62", (5, 0))
+        g.write(str(score))

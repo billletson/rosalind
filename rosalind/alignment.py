@@ -1,6 +1,13 @@
 from .io import load_scoring_matrix
 
 
+class Directions:
+    undefined, diag, up, left = range(4)
+
+    def __init__(self):
+        pass
+
+
 def levenshtein(first, second, scoring_matrix=None, gap=1):
     """
     Calculate the levenshtein distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
@@ -13,7 +20,7 @@ def levenshtein(first, second, scoring_matrix=None, gap=1):
 
 def alignment_score(first, second, scoring_matrix=None, gap=1):
     """
-    Calculate the alignment score distance between two sequences. http://en.wikipedia.org/wiki/Levenshtein_distance
+    Calculate the alignment score distance between two sequences.
     Can take a custom scoring matrix and gap penalty
     Arguments: Sequence first, Sequence second, str scoring_matrix, int gap
     Returns: int
@@ -24,7 +31,11 @@ def alignment_score(first, second, scoring_matrix=None, gap=1):
         scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    return _alignment_matrix(s, t, scoring, gap)[len(s)][len(t)]
+    if type(gap) is int:
+        matrix = _alignment_matrix(s, t, scoring, gap)
+    else:
+        matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap)
+    return matrix[-1][-1]
 
 
 def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
@@ -101,6 +112,50 @@ def _alignment_matrix(s, t, scoring, gap, local=False):
             if local and matrix[i][j] < 0:
                 matrix[i][j] = 0
     return matrix
+
+
+def _affine_alignment_matrix(s, t, scoring, gap, local=False):
+    m = len(s)
+    n = len(t)
+    open_gap, extend_gap = gap
+    scores = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    f = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    ii = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    ij = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    pointer = [[Directions.undefined for i in xrange(n + 1)] for j in xrange(m + 1)]
+
+    for i in xrange(1, m+1):
+        pointer[i][0] = Directions.up
+        if not local:
+            scores[i][0] = -(open_gap + (i - 1) * extend_gap)
+    for i in xrange(1, n+1):
+        pointer[0][i] = Directions.left
+        if not local:
+            scores[0][i] = -(open_gap + (i - 1) * extend_gap)
+
+    for j in xrange(1, n + 1):
+        for i in xrange(1, m + 1):
+            f[i][j] = scores[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])]
+            if i == 1:
+                ii[i][j] = scores[i - 1][j] - open_gap
+            else:
+                ii[i][j] = max(ii[i - 1][j] - extend_gap, scores[i - 1][j] - open_gap)
+            if j == 1:
+                ij[i][j] = scores[i][j - 1] - open_gap
+            else:
+                ij[i][j] = max(ij[i][j - 1] - extend_gap, scores[i][j - 1] - open_gap)
+            scores[i][j] = max(f[i][j], ii[i][j], ij[i][j])
+            if scores[i][j] == f[i][j]:
+                pointer[i][j] = Directions.diag
+            elif scores[i][j] == ii[i][j]:
+                pointer[i][j] = Directions.up
+            elif scores[i][j] == ij[i][j]:
+                pointer[i][j] = Directions.left
+            else:
+                raise ValueError("Uh Oh")
+
+    return scores, pointer
+
 
 
 def _alignment_backtrack(s, t, matrix, local=False, gap_symbol="-", start=None):
