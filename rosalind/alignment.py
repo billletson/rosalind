@@ -52,7 +52,7 @@ def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
     s = first.sequence
     t = second.sequence
     matrix = _alignment_matrix(s, t, scoring, gap)
-    s1, t1 = _alignment_backtrack(s, t, matrix)
+    s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap)
     return -1 * matrix[-1][-1], s1, t1
 
 
@@ -87,7 +87,7 @@ def best_local_alignment(first, second, scoring_matrix=None, gap=1):
     t = second.sequence
     matrix = _alignment_matrix(s, t, scoring, gap, True)
     start = _array_max_index(matrix)
-    s1, t1 = _alignment_backtrack(s, t, matrix, True, "", start)
+    s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, "", start)
     return matrix[start[0]][start[1]], s1, t1
 
 
@@ -157,8 +157,7 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     return scores, pointer
 
 
-
-def _alignment_backtrack(s, t, matrix, local=False, gap_symbol="-", start=None):
+def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-", start=None):
     """
     Given two strings and the levenshtein distance matrix between the two, backtrack through and create an alignment.
     Arguments: str s, str t, int[][] matrix
@@ -175,31 +174,21 @@ def _alignment_backtrack(s, t, matrix, local=False, gap_symbol="-", start=None):
     while i > 0 or j > 0:
         if local and matrix[i][j] == 0:
             break
-        if i == 0:
-            up = len(s)
-        else:
-            up = matrix[i - 1][j]
-        if j == 0:
-            left = len(t)
-        else:
-            left = matrix[i][j - 1]
-        if j == 0 or i == 0:
-            diag = max(len(s), len(t))
-        else:
-            diag = matrix[i - 1][j - 1]
-        if diag >= left and diag >= up:
+        if j > 0 and i > 0 and matrix[i][j] - matrix[i - 1][j - 1] == scoring[(s[i - 1], t[j - 1])]:
             i -= 1
             j -= 1
             s1 = s[i] + s1
             t1 = t[j] + t1
-        elif left >= up:
+        elif i > 0 and matrix[i][j] - matrix[i - 1][j] == -gap:
+            i -= 1
+            s1 = s[i] + s1
+            t1 = gap_symbol + t1
+        elif j > 0 and matrix[i][j] - matrix[i][j - 1] == -gap:
             j -= 1
             s1 = gap_symbol + s1
             t1 = t[j] + t1
         else:
-            i -= 1
-            s1 = s[i] + s1
-            t1 = gap_symbol + t1
+            raise ValueError("Wrong scoring matrix?")
     return s1, t1
 
 
