@@ -57,8 +57,6 @@ def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
     else:
         matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap)
         s1, t1, = _alignment_backtrack_pointer(s, t, matrix, pointer)
-        for line in matrix:
-            print " ".join(map(str, line))
     return -1*matrix[-1][-1], s1, t1
 
 
@@ -137,38 +135,56 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     f = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
     ii = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
     ij = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    pointer = [[Directions.undefined for i in xrange(n + 1)] for j in xrange(m + 1)]
+    pointer = {'f': [[Directions.undefined for i in xrange(n + 1)] for j in xrange(m + 1)],
+               'i': [[Directions.up for i in xrange(n + 1)] for j in xrange(m + 1)],
+               'j': [[Directions.left for i in xrange(n + 1)] for j in xrange(m + 1)]}
 
     for i in xrange(1, m+1):
-        pointer[i][0] = Directions.up
+        pointer['f'][i][0] = Directions.up
+        pointer['i'][i][0] = Directions.up
+        pointer['j'][i][0] = Directions.up
         if not local:
             scores[i][0] = -(open_gap + (i - 1) * extend_gap)
+            ii[i][0] = -(open_gap + (i - 1) * extend_gap)
     for i in xrange(1, n+1):
-        pointer[0][i] = Directions.left
+        pointer['f'][0][i] = Directions.left
+        pointer['i'][0][i] = Directions.left
+        pointer['j'][0][i] = Directions.left
         if not local:
             scores[0][i] = -(open_gap + (i - 1) * extend_gap)
+            ij[0][i] = -(open_gap + (i - 1) * extend_gap)
 
     for j in xrange(1, n + 1):
         for i in xrange(1, m + 1):
             f[i][j] = scores[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])]
+            if scores[i - 1][j - 1] == f[i - 1][j - 1]:
+                pointer['f'][i][j] = Directions.diag
+            elif scores[i - 1][j - 1] == ii[i - 1][j - 1]:
+                pointer['f'][i][j] = Directions.up
+            elif scores[i - 1][j - 1] == ij[i - 1][j - 1]:
+                pointer['f'][i][j] = Directions.left
+            else:
+                raise ValueError("Uh Oh")
             if i == 1:
                 ii[i][j] = scores[i - 1][j] - open_gap
             else:
                 ii[i][j] = max(ii[i - 1][j] - extend_gap, scores[i - 1][j] - open_gap)
+                if ii[i][j] == scores[i - 1][j] - open_gap and scores[i - 1][j] == f[i - 1][j]:
+                    pointer['i'][i][j] = Directions.diag
             if j == 1:
-                ij[i][j] = scores[i][j - 1] - open_gap
+                ij[i][j] = scores[i][j] - open_gap
             else:
                 ij[i][j] = max(ij[i][j - 1] - extend_gap, scores[i][j - 1] - open_gap)
-            scores[i][j] = max(f[i][j], ii[i][j], ij[i][j])
-            if scores[i][j] == f[i][j]:
-                pointer[i][j] = Directions.diag
-            elif scores[i][j] == ii[i][j]:
-                pointer[i][j] = Directions.up
-            elif scores[i][j] == ij[i][j]:
-                pointer[i][j] = Directions.left
-            else:
-                raise ValueError("Uh Oh")
+                if ij[i][j] == scores[i][j - 1] - open_gap and scores[i][j - 1] == f[i][j - 1]:
+                    pointer['j'][i][j] = Directions.diag
 
+            scores[i][j] = max(f[i][j], ii[i][j], ij[i][j])
+    if scores[-1][-1] == f[-1][-1]:
+        pointer['start'] = 'f'
+    elif scores[-1][-1] == ii[-1][-1]:
+        pointer['start'] = 'i'
+    elif scores[-1][-1] == ij[-1][-1]:
+        pointer['start'] = 'j'
     return scores, pointer
 
 
@@ -209,7 +225,7 @@ def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-"
 
 def _alignment_backtrack_pointer(s, t, matrix, pointer, local=False, gap_symbol="-", start=None):
     """
-    Given two strings and a pointer matrix, backtrack through and create an alignment. The alignment score matrix is
+    Given two strings and a set of pointer matricies, backtrack through and create an alignment. The alignment score matrix is
     only really necessary for the local version, but will require a refactor to make optional.
     Arguments: str s, str t, int[][] matrix, int[][] pointer, bool local, str gap_symbol, (int, int) start
     Returns: str, str
@@ -219,27 +235,41 @@ def _alignment_backtrack_pointer(s, t, matrix, pointer, local=False, gap_symbol=
     if start is None:
         i = len(s)
         j = len(t)
+        pointer_id = pointer['start']
     else:
         i = start[0]
         j = start[1]
+        pointer_id = 'f'
+    current_pointer = pointer[pointer_id]
     while i > 0 or j > 0:
+        next_dir = current_pointer[i][j]
         if local and matrix[i][j] == 0:
             break
-        if pointer[i][j] == Directions.diag:
+        if pointer_id == 'f':
             i -= 1
             j -= 1
             s1 = s[i] + s1
             t1 = t[j] + t1
-        elif pointer[i][j] == Directions.up:
+        elif pointer_id == 'i':
             i -= 1
             s1 = s[i] + s1
             t1 = gap_symbol + t1
-        elif pointer[i][j] == Directions.left:
+        elif pointer_id == 'j':
             j -= 1
             t1 = t[j] + t1
             s1 = gap_symbol + s1
         else:
             raise ValueError("Invalid pointer matrix")
+
+        if next_dir == Directions.diag:
+            pointer_id = 'f'
+        elif next_dir == Directions.up:
+            pointer_id = 'i'
+        elif next_dir == Directions.left:
+            pointer_id = 'j'
+        else:
+            raise ValueError("Invalid pointer matrix")
+        current_pointer = pointer[pointer_id]
     return s1, t1
 
 
