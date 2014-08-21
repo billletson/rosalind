@@ -143,6 +143,8 @@ problems.prob_gaff()
 assert filecmp.cmp("answer.txt", "sample_answers/GAFF.txt")
 problems.prob_laff()
 assert filecmp.cmp("answer.txt", "sample_answers/LAFF.txt")
+problems.prob_smgb()
+assert filecmp.cmp("answer.txt", "sample_answers/SMGB.txt")
 
 
 print "tests pass"

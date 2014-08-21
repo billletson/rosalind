@@ -776,7 +776,8 @@ def prob_edta(mode="sample"):
     with open(mode + "_inputs/EDTA.txt", "rb") as f:
         proteins = rosalind.load_fasta_file(f, s_type="Protein")
     with open("answer.txt", "wb") as g:
-        g.write("\r\n".join(map(str, rosalind.edit_distance_alignment(proteins[0], proteins[1]))))
+        score, s, t = rosalind.global_alignment(proteins[0], proteins[1])
+        g.write("\r\n".join([str(-score), s, t]))
 
 
 def prob_ctea(mode="sample"):
@@ -816,7 +817,7 @@ def prob_loca(mode="sample"):
     with open(mode + "_inputs/LOCA.txt", "rb") as f:
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
-        score, s, t = rosalind.best_local_alignment(dnas[0], dnas[1], "PAM250", 5)
+        score, s, t = rosalind.local_alignment(dnas[0], dnas[1], "PAM250", 5)
         g.write("\r\n".join([str(score), s, t]))
 
 
@@ -838,8 +839,8 @@ def prob_gaff(mode="sample"):
     with open(mode + "_inputs/GAFF.txt", "rb") as f:
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
-        score, s, t = rosalind.edit_distance_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
-        g.write("\r\n".join([str(-score), s, t]))
+        score, s, t = rosalind.global_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
+        g.write("\r\n".join([str(score), s, t]))
 
 
 def prob_laff(mode="sample"):
@@ -849,5 +850,16 @@ def prob_laff(mode="sample"):
     with open(mode + "_inputs/LAFF.txt", "rb") as f:
         dnas = rosalind.load_fasta_file(f)
     with open("answer.txt", "wb") as g:
-        score, s, t = rosalind.best_local_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
+        score, s, t = rosalind.local_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
+        g.write("\r\n".join([str(score), s, t]))
+
+
+def prob_smgb(mode="sample"):
+    """
+    Semiglobal Alignment
+    """
+    with open(mode + "_inputs/SMGB.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, s, t = rosalind.semi_global_alignment(dnas[0], dnas[1], (1, -1), 1)
         g.write("\r\n".join([str(score), s, t]))

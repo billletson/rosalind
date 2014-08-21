@@ -25,10 +25,7 @@ def alignment_score(first, second, scoring_matrix=None, gap=1):
     Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: int
     """
-    if scoring_matrix is None:
-        scoring = _DefaultMatrix()
-    else:
-        scoring = load_scoring_matrix(scoring_matrix)
+    scoring = _get_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
     if type(gap) is int:
@@ -38,17 +35,14 @@ def alignment_score(first, second, scoring_matrix=None, gap=1):
     return matrix[-1][-1]
 
 
-def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
+def global_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Find an optimal alignment minimizing edit distance between two sequences, return the distance and a pair of
     strings representing an optimal alignment.
     Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: int, str, str
     """
-    if scoring_matrix is None:
-        scoring = _DefaultMatrix()
-    else:
-        scoring = load_scoring_matrix(scoring_matrix)
+    scoring = _get_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
     if type(gap) == int:
@@ -57,7 +51,7 @@ def edit_distance_alignment(first, second, scoring_matrix=None, gap=1):
     else:
         matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap)
         s1, t1, = _alignment_backtrack_pointer(s, t, matrix, pointer)
-    return -1*matrix[-1][-1], s1, t1
+    return matrix[-1][-1], s1, t1
 
 
 def optimal_alignment_count(first, second, modulus=None, scoring_matrix=None, gap=1):
@@ -67,32 +61,26 @@ def optimal_alignment_count(first, second, modulus=None, scoring_matrix=None, ga
     Arguments: Sequence first, Sequence second, int modulus, str scoring_matrix, int or (int, int) gap
     Returns: int
     """
-    if scoring_matrix is None:
-        scoring = _DefaultMatrix()
-    else:
-        scoring = load_scoring_matrix(scoring_matrix)
+    scoring = _get_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
     matrix = _alignment_matrix(s, t, scoring, gap)
     return _count_alignments(s, t, matrix, modulus)
 
 
-def best_local_alignment(first, second, scoring_matrix=None, gap=1):
+def local_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Finds the local alignment of a pair of sequences with the shortest edit distance.
     Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
     Returns: ?
     """
-    if scoring_matrix is None:
-        scoring = _DefaultMatrix()
-    else:
-        scoring = load_scoring_matrix(scoring_matrix)
+    scoring = _get_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
     if type(gap) is int:
         matrix = _alignment_matrix(s, t, scoring, gap, True)
         start = _array_max_index(matrix)
-        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, "", start)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, False, "", start)
     else:
         matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap, True)
         start = _array_max_index(matrix)
@@ -100,7 +88,37 @@ def best_local_alignment(first, second, scoring_matrix=None, gap=1):
     return matrix[start[0]][start[1]], s1, t1
 
 
-def _alignment_matrix(s, t, scoring, gap, local=False):
+def semi_global_alignment(first, second, scoring_matrix=None, gap=1):
+    """
+    Finds the local alignment of a pair of sequences with the shortest edit distance.
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
+    Returns: ?
+    """
+    scoring = _get_scoring_matrix(scoring_matrix)
+    s = first.sequence
+    t = second.sequence
+    m = len(s)
+    n = len(t)
+    if type(gap) is int:
+        matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+        if n > m:
+            start = (m, matrix[-1].index(max(matrix[-1])))
+        else:
+            last_col = [row[-1] for row in matrix]
+            start = (last_col.index(max(last_col)), n)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start)
+        if m > n:
+            s1 += s[start[0]:]
+            t1 += "-" * (m - start[0])
+        else:
+            t1 += t[start[0]:]
+            s1 += "-" * (n - start[0])
+    else:
+        raise ValueError("NOT IMPLEMENTED!")
+    return matrix[start[0]][start[1]], s1, t1
+
+
+def _alignment_matrix(s, t, scoring, gap, local=False, semi_global=False):
     """
     Calculate a matrix showing the alignment score between all prefixes of two strings, with the last element
     being the alignment score between the whole two strings. Only works for a linear gap penalty, but uses less space
@@ -111,7 +129,7 @@ def _alignment_matrix(s, t, scoring, gap, local=False):
     m = len(s)
     n = len(t)
     matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    if not local:
+    if not local and not semi_global:
         for i in xrange(m+1):
             matrix[i][0] = i * -gap
         for i in xrange(n+1):
@@ -203,7 +221,7 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     return scores, pointer
 
 
-def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-", start=None):
+def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, semi_global=False, gap_symbol="-", start=None):
     """
     Given two strings and the alignment score matrix between the two, backtrack through and create an alignment.
     Arguments: str s, str t, int[][] matrix, {(str, str): int} scoring, int gap, bool local, str gap_symbol, (int, int) start
@@ -225,11 +243,11 @@ def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-"
             j -= 1
             s1 = s[i] + s1
             t1 = t[j] + t1
-        elif i > 0 and matrix[i][j] - matrix[i - 1][j] == -gap:
+        elif (i > 0 and matrix[i][j] - matrix[i - 1][j] == -gap) or (semi_global and j == 0):
             i -= 1
             s1 = s[i] + s1
             t1 = gap_symbol + t1
-        elif j > 0 and matrix[i][j] - matrix[i][j - 1] == -gap:
+        elif (j > 0 and matrix[i][j] - matrix[i][j - 1] == -gap) or (semi_global and i == 0):
             j -= 1
             s1 = gap_symbol + s1
             t1 = t[j] + t1
@@ -318,15 +336,28 @@ def _count_alignments(s, t, matrix, modulus=None):
     return current[-1]
 
 
+def _get_scoring_matrix(scoring_matrix):
+    if scoring_matrix is None:
+        return _DefaultMatrix(0, -1)
+    elif type(scoring_matrix) is str:
+        return load_scoring_matrix(scoring_matrix)
+    else:
+        return _DefaultMatrix(scoring_matrix[0], scoring_matrix[1])
+
+
 class _DefaultMatrix(dict):
     """
     Dict-like object for the default scoring of -1 for a substitution, 0 for a match.
     """
+    def __init__(self, match, substitution):
+        self.match = match
+        self.substitution = substitution
+
     def __missing__(self, key):
         if key[0] == key[1]:
-            return 0
+            return self.match
         else:
-            return -1
+            return self.substitution
 
 
 def _array_max_index(matrix):
