@@ -89,9 +89,14 @@ def best_local_alignment(first, second, scoring_matrix=None, gap=1):
         scoring = load_scoring_matrix(scoring_matrix)
     s = first.sequence
     t = second.sequence
-    matrix = _alignment_matrix(s, t, scoring, gap, True)
-    start = _array_max_index(matrix)
-    s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, "", start)
+    if type(gap) is int:
+        matrix = _alignment_matrix(s, t, scoring, gap, True)
+        start = _array_max_index(matrix)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, "", start)
+    else:
+        matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap, True)
+        start = _array_max_index(matrix)
+        s1, t1 = _alignment_backtrack_pointer(s, t, matrix, pointer, True, "", start)
     return matrix[start[0]][start[1]], s1, t1
 
 
@@ -157,6 +162,8 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     for j in xrange(1, n + 1):
         for i in xrange(1, m + 1):
             f[i][j] = scores[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])]
+            if local and f[i][j] < 0:
+                f[i][j] = 0
             if scores[i - 1][j - 1] == f[i - 1][j - 1]:
                 pointer['f'][i][j] = Directions.diag
             elif scores[i - 1][j - 1] == ii[i - 1][j - 1]:
@@ -167,14 +174,22 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
                 raise ValueError("Uh Oh")
             if i == 1:
                 ii[i][j] = scores[i - 1][j] - open_gap
+                if local and ii[i][j] < 0:
+                    ii[i][j] = 0
             else:
                 ii[i][j] = max(ii[i - 1][j] - extend_gap, scores[i - 1][j] - open_gap)
+                if local and ii[i][j] < 0:
+                    ii[i][j] = 0
                 if ii[i][j] == scores[i - 1][j] - open_gap and scores[i - 1][j] == f[i - 1][j]:
                     pointer['i'][i][j] = Directions.diag
             if j == 1:
                 ij[i][j] = scores[i][j] - open_gap
+                if local and ij[i][j] < 0:
+                    ij[i][j] = 0
             else:
                 ij[i][j] = max(ij[i][j - 1] - extend_gap, scores[i][j - 1] - open_gap)
+                if local and ij[i][j] < 0:
+                    ij[i][j] = 0
                 if ij[i][j] == scores[i][j - 1] - open_gap and scores[i][j - 1] == f[i][j - 1]:
                     pointer['j'][i][j] = Directions.diag
 

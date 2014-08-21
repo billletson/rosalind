@@ -840,3 +840,14 @@ def prob_gaff(mode="sample"):
     with open("answer.txt", "wb") as g:
         score, s, t = rosalind.edit_distance_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
         g.write("\r\n".join([str(-score), s, t]))
+
+
+def prob_laff(mode="sample"):
+    """
+    Local Alignment with Affine Gap Penalty
+    """
+    with open(mode + "_inputs/LAFF.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, s, t = rosalind.best_local_alignment(dnas[0], dnas[1], "BLOSUM62", (11, 1))
+        g.write("\r\n".join([str(score), s, t]))

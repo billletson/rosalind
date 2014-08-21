@@ -141,6 +141,8 @@ problems.prob_gcon()
 assert filecmp.cmp("answer.txt", "sample_answers/GCON.txt")
 problems.prob_gaff()
 assert filecmp.cmp("answer.txt", "sample_answers/GAFF.txt")
+problems.prob_laff()
+assert filecmp.cmp("answer.txt", "sample_answers/LAFF.txt")
 
 
 print "tests pass"
