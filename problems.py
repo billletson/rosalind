@@ -863,3 +863,14 @@ def prob_smgb(mode="sample"):
     with open("answer.txt", "wb") as g:
         score, s, t = rosalind.semi_global_alignment(dnas[0], dnas[1], (1, -1), 1)
         g.write("\r\n".join([str(score), s, t]))
+
+
+def prob_oap(mode="sample"):
+    """
+    Overlapping Reads with Errors
+    """
+    with open(mode + "_inputs/OAP.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, s, t = rosalind.overlap_alignment(dnas[0], dnas[1], (1, -2), 2)
+        g.write("\r\n".join([str(score), s, t]))

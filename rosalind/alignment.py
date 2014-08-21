@@ -118,6 +118,44 @@ def semi_global_alignment(first, second, scoring_matrix=None, gap=1):
     return matrix[start[0]][start[1]], s1, t1
 
 
+def overlap_alignment(first, second, scoring_matrix=None, gap=1):
+    """
+    Finds the local alignment of a pair of sequences with the shortest edit distance.
+    Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
+    Returns: ?
+    """
+    scoring = _get_scoring_matrix(scoring_matrix)
+    s = first.sequence
+    t = second.sequence
+    m = len(s)
+    n = len(t)
+    matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+    start_candidate1 = (m, matrix[-1].index(max(matrix[-1])))
+    last_col = [row[-1] for row in matrix]
+    start_candidate2 = (last_col.index(max(last_col)), n)
+    if matrix[start_candidate1[0]][start_candidate1[1]] >= matrix[start_candidate2[0]][start_candidate2[1]]:
+        score = matrix[start_candidate1[0]][start_candidate1[1]]
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate1)
+        strip = 0
+        for char in t1:
+            if char == "-":
+                strip += 1
+            else:
+                break
+    else:
+        score = matrix[start_candidate2[0]][start_candidate2[1]]
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate2)
+        strip = 0
+        for char in s1:
+            if char == "-":
+                strip += 1
+            else:
+                break
+    s1 = s1[strip:]
+    t1 = t1[strip:]
+    return score, s1, t1
+
+
 def _alignment_matrix(s, t, scoring, gap, local=False, semi_global=False):
     """
     Calculate a matrix showing the alignment score between all prefixes of two strings, with the last element
