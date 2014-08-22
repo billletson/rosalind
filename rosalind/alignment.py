@@ -88,7 +88,7 @@ def local_alignment(first, second, scoring_matrix=None, gap=1):
     return matrix[start[0]][start[1]], s1, t1
 
 
-def semi_global_alignment(first, second, scoring_matrix=None, gap=1):
+def semi_global_alignment(first, second, scoring_matrix=None, gap=1, trim=False):
     """
     Finds the local alignment of a pair of sequences with the shortest edit distance.
     Arguments: Sequence first, Sequence second, str scoring_matrix, int or (int, int) gap
@@ -115,6 +115,8 @@ def semi_global_alignment(first, second, scoring_matrix=None, gap=1):
             s1 += "-" * (n - start[0])
     else:
         raise ValueError("NOT IMPLEMENTED!")
+    if trim:
+        s1, t1 = _trim_gaps(s1, t1)
     return matrix[start[0]][start[1]], s1, t1
 
 
@@ -136,23 +138,10 @@ def overlap_alignment(first, second, scoring_matrix=None, gap=1):
     if matrix[start_candidate1[0]][start_candidate1[1]] >= matrix[start_candidate2[0]][start_candidate2[1]]:
         score = matrix[start_candidate1[0]][start_candidate1[1]]
         s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate1)
-        strip = 0
-        for char in t1:
-            if char == "-":
-                strip += 1
-            else:
-                break
     else:
         score = matrix[start_candidate2[0]][start_candidate2[1]]
         s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate2)
-        strip = 0
-        for char in s1:
-            if char == "-":
-                strip += 1
-            else:
-                break
-    s1 = s1[strip:]
-    t1 = t1[strip:]
+    s1, t1 = _trim_gaps(s1, t1)
     return score, s1, t1
 
 
@@ -412,3 +401,32 @@ def _array_max_index(matrix):
     i = maxes.index(max(maxes))
     j = indicies[i]
     return i, j
+
+
+def _trim_gaps(s, t, symbol="-"):
+    front_strip = [0, 0]
+    back_strip = [0, 0]
+    for char in s:
+        if char == symbol:
+            front_strip[0] += 1
+        else:
+            break
+    for char in t:
+        if char == symbol:
+            front_strip[1] += 1
+        else:
+            break
+    for char in s[::-1]:
+        if char == symbol:
+            back_strip[0] += 1
+        else:
+            break
+    for char in t[::-1]:
+        if char == symbol:
+            back_strip[0] += 1
+        else:
+            break
+    #-0 == 0 so no backtrim trims all without the None
+    s = s[max(front_strip):-max(back_strip) or None]
+    t = t[max(front_strip):-max(back_strip) or None]
+    return s, t

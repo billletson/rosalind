@@ -874,3 +874,14 @@ def prob_oap(mode="sample"):
     with open("answer.txt", "wb") as g:
         score, s, t = rosalind.overlap_alignment(dnas[0], dnas[1], (1, -2), 2)
         g.write("\r\n".join([str(score), s, t]))
+
+
+def prob_sims(mode="sample"):
+    """
+    Finding a Motif with Modifications
+    """
+    with open(mode + "_inputs/SIMS.txt", "rb") as f:
+        dnas = rosalind.load_fasta_file(f)
+    with open("answer.txt", "wb") as g:
+        score, s, t = rosalind.semi_global_alignment(dnas[0], dnas[1], (1, -1), 1, True)
+        g.write("\r\n".join([str(score), s, t]))
