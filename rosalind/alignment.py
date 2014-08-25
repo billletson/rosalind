@@ -1,4 +1,6 @@
 from .io import load_scoring_matrix
+import array
+import itertools
 
 
 class Directions:
@@ -186,7 +188,7 @@ def _alignment_matrix(s, t, scoring, gap, local=False, semi_global=False):
     """
     m = len(s)
     n = len(t)
-    matrix = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
+    matrix = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
     if not local and not semi_global:
         for i in xrange(m+1):
             matrix[i][0] = i * -gap
@@ -212,13 +214,13 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     m = len(s)
     n = len(t)
     open_gap, extend_gap = gap
-    scores = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    f = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    ii = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    ij = [[0 for i in xrange(n + 1)] for j in xrange(m + 1)]
-    pointer = {'f': [[Directions.undefined for i in xrange(n + 1)] for j in xrange(m + 1)],
-               'i': [[Directions.up for i in xrange(n + 1)] for j in xrange(m + 1)],
-               'j': [[Directions.left for i in xrange(n + 1)] for j in xrange(m + 1)]}
+    scores = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
+    f = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
+    ii = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
+    ij = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
+    pointer = {'f': [array.array('i', itertools.repeat(Directions.undefined, n + 1)) for _ in xrange(m + 1)],
+               'i': [array.array('i', itertools.repeat(Directions.up, n + 1)) for _ in xrange(m + 1)],
+               'j': [array.array('i', itertools.repeat(Directions.left, n + 1)) for _ in xrange(m + 1)]}
 
     for i in xrange(1, m+1):
         pointer['f'][i][0] = Directions.up
