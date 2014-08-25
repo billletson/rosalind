@@ -120,6 +120,37 @@ def semi_global_alignment(first, second, scoring_matrix=None, gap=1, trim=False)
     return matrix[start[0]][start[1]], s1, t1
 
 
+def all_semi_global_alignments(first, second, scoring_matrix=None, gap=1, k=0):
+    scoring = _get_scoring_matrix(scoring_matrix)
+    s = first.sequence
+    t = second.sequence
+    m = len(s)
+    n = len(t)
+    if n < m:
+        s, t = t, s
+        m, n = n, m
+    pairs = []
+    if type(gap) is int:
+        matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+        for i in xrange(len(matrix[-1])):
+            sub_score = matrix[-1][i]
+            if sub_score >= k:
+                s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", (m, i))
+                long_all_gaps = t1.count("-")
+                short_leading_gaps = _leading_symbols(s1)
+                long_leading_gaps = _leading_symbols(t1)
+                m1 = len(s1)
+                n1 = len(t1)
+                true_len = n1 - short_leading_gaps - long_all_gaps
+                if true_len < m1:
+                    sub_score = matrix[-1][i] - long_leading_gaps * gap
+                if sub_score >= k:
+                    pairs.append((short_leading_gaps, true_len))
+    else:
+        raise ValueError("NOT IMPLEMENTED!")
+    return pairs
+
+
 def overlap_alignment(first, second, scoring_matrix=None, gap=1):
     """
     Finds the local alignment of a pair of sequences with the shortest edit distance.
@@ -404,29 +435,19 @@ def _array_max_index(matrix):
 
 
 def _trim_gaps(s, t, symbol="-"):
-    front_strip = [0, 0]
-    back_strip = [0, 0]
-    for char in s:
-        if char == symbol:
-            front_strip[0] += 1
-        else:
-            break
-    for char in t:
-        if char == symbol:
-            front_strip[1] += 1
-        else:
-            break
-    for char in s[::-1]:
-        if char == symbol:
-            back_strip[0] += 1
-        else:
-            break
-    for char in t[::-1]:
-        if char == symbol:
-            back_strip[0] += 1
-        else:
-            break
+    front_strip = (_leading_symbols(s), _leading_symbols(t))
+    back_strip = (_leading_symbols(s[::-1]), _leading_symbols(t[::-1]))
     #-0 == 0 so no backtrim trims all without the None
     s = s[max(front_strip):-max(back_strip) or None]
     t = t[max(front_strip):-max(back_strip) or None]
     return s, t
+
+
+def _leading_symbols(s, symbol="-"):
+    count = 0
+    for char in s:
+        if char == symbol:
+            count += 1
+        else:
+            break
+    return count

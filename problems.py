@@ -885,3 +885,16 @@ def prob_sims(mode="sample"):
     with open("answer.txt", "wb") as g:
         score, s, t = rosalind.semi_global_alignment(dnas[0], dnas[1], (1, -1), 1, True)
         g.write("\r\n".join([str(score), s, t]))
+
+
+def prob_ksim(mode="sample"):
+    """
+    Finding All Similar Motifs
+    """
+    with open(mode + "_inputs/KSIM.txt", "rb") as f:
+        k = -int(f.next().strip())
+        first = rosalind.DNA("", f.next().strip())
+        second = rosalind.DNA("", f.next().strip())
+    with open("answer.txt", "wb") as g:
+        pairs = rosalind.all_semi_global_alignments(first, second, (0, -1), 1, k)
+        g.write("\r\n".join([" ".join([str(pair[0]+1), str(pair[1])]) for pair in pairs]))
