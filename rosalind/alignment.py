@@ -82,7 +82,7 @@ def local_alignment(first, second, scoring_matrix=None, gap=1):
     if type(gap) is int:
         matrix = _alignment_matrix(s, t, scoring, gap, True)
         start = _array_max_index(matrix)
-        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, False, "", start)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, True, "", start)
     else:
         matrix, pointer = _affine_alignment_matrix(s, t, scoring, gap, True)
         start = _array_max_index(matrix)
@@ -102,13 +102,13 @@ def semi_global_alignment(first, second, scoring_matrix=None, gap=1, trim=False)
     m = len(s)
     n = len(t)
     if type(gap) is int:
-        matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+        matrix = _alignment_matrix(s, t, scoring, gap, False, (True, True))
         if n > m:
             start = (m, matrix[-1].index(max(matrix[-1])))
         else:
             last_col = [row[-1] for row in matrix]
             start = (last_col.index(max(last_col)), n)
-        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, "-", start)
         if m > n:
             s1 += s[start[0]:]
             t1 += "-" * (m - start[0])
@@ -116,7 +116,7 @@ def semi_global_alignment(first, second, scoring_matrix=None, gap=1, trim=False)
             t1 += t[start[0]:]
             s1 += "-" * (n - start[0])
     else:
-        raise ValueError("NOT IMPLEMENTED!")
+        raise ValueError("Affine gap not implemented")
     if trim:
         s1, t1 = _trim_gaps(s1, t1)
     return matrix[start[0]][start[1]], s1, t1
@@ -133,23 +133,18 @@ def all_semi_global_alignments(first, second, scoring_matrix=None, gap=1, k=0):
         m, n = n, m
     pairs = []
     if type(gap) is int:
-        matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+        matrix = _alignment_matrix(s, t, scoring, gap, False, (False, True))
         for i in xrange(len(matrix[-1])):
             sub_score = matrix[-1][i]
             if sub_score >= k:
-                s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", (m, i))
+                s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, "-", (m, i))
                 long_all_gaps = t1.count("-")
                 short_leading_gaps = _leading_symbols(s1)
-                long_leading_gaps = _leading_symbols(t1)
-                m1 = len(s1)
                 n1 = len(t1)
                 true_len = n1 - short_leading_gaps - long_all_gaps
-                if true_len < m1:
-                    sub_score = matrix[-1][i] - long_leading_gaps * gap
-                if sub_score >= k:
-                    pairs.append((short_leading_gaps, true_len))
+                pairs.append((short_leading_gaps, true_len))
     else:
-        raise ValueError("NOT IMPLEMENTED!")
+        raise ValueError("Affine gap not implemented")
     return pairs
 
 
@@ -164,21 +159,21 @@ def overlap_alignment(first, second, scoring_matrix=None, gap=1):
     t = second.sequence
     m = len(s)
     n = len(t)
-    matrix = _alignment_matrix(s, t, scoring, gap, False, True)
+    matrix = _alignment_matrix(s, t, scoring, gap, False, (True, True))
     start_candidate1 = (m, matrix[-1].index(max(matrix[-1])))
     last_col = [row[-1] for row in matrix]
     start_candidate2 = (last_col.index(max(last_col)), n)
     if matrix[start_candidate1[0]][start_candidate1[1]] >= matrix[start_candidate2[0]][start_candidate2[1]]:
         score = matrix[start_candidate1[0]][start_candidate1[1]]
-        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate1)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, "-", start_candidate1)
     else:
         score = matrix[start_candidate2[0]][start_candidate2[1]]
-        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, True, "-", start_candidate2)
+        s1, t1 = _alignment_backtrack(s, t, matrix, scoring, gap, False, "-", start_candidate2)
     s1, t1 = _trim_gaps(s1, t1)
     return score, s1, t1
 
 
-def _alignment_matrix(s, t, scoring, gap, local=False, semi_global=False):
+def _alignment_matrix(s, t, scoring, gap, local=False, free_end_gaps=(False, False)):
     """
     Calculate a matrix showing the alignment score between all prefixes of two strings, with the last element
     being the alignment score between the whole two strings. Only works for a linear gap penalty, but uses less space
@@ -189,11 +184,12 @@ def _alignment_matrix(s, t, scoring, gap, local=False, semi_global=False):
     m = len(s)
     n = len(t)
     matrix = [array.array('i', itertools.repeat(0, n + 1)) for _ in xrange(m + 1)]
-    if not local and not semi_global:
+    if not local and not free_end_gaps[0]:
         for i in xrange(m+1):
             matrix[i][0] = i * -gap
-        for i in xrange(n+1):
-            matrix[0][i] = i * -gap
+    if not local and not free_end_gaps[1]:
+        for j in xrange(n+1):
+            matrix[0][j] = j * -gap
     for j in xrange(1, n + 1):
         for i in xrange(1, m + 1):
             matrix[i][j] = max(matrix[i - 1][j] - gap, matrix[i][j - 1] - gap, matrix[i - 1][j - 1] + scoring[(s[i - 1], t[j - 1])])
@@ -281,7 +277,7 @@ def _affine_alignment_matrix(s, t, scoring, gap, local=False):
     return scores, pointer
 
 
-def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, semi_global=False, gap_symbol="-", start=None):
+def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, gap_symbol="-", start=None):
     """
     Given two strings and the alignment score matrix between the two, backtrack through and create an alignment.
     Arguments: str s, str t, int[][] matrix, {(str, str): int} scoring, int gap, bool local, str gap_symbol, (int, int) start
@@ -303,11 +299,11 @@ def _alignment_backtrack(s, t, matrix, scoring, gap, local=False, semi_global=Fa
             j -= 1
             s1 = s[i] + s1
             t1 = t[j] + t1
-        elif (i > 0 and matrix[i][j] - matrix[i - 1][j] == -gap) or (semi_global and j == 0):
+        elif (j == 0) or (i > 0 and matrix[i][j] - matrix[i - 1][j] == -gap):
             i -= 1
             s1 = s[i] + s1
             t1 = gap_symbol + t1
-        elif (j > 0 and matrix[i][j] - matrix[i][j - 1] == -gap) or (semi_global and i == 0):
+        elif (i == 0) or (j > 0 and matrix[i][j] - matrix[i][j - 1] == -gap):
             j -= 1
             s1 = gap_symbol + s1
             t1 = t[j] + t1
